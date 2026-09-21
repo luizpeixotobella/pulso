@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: pulso
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://pulso.rocks
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: PULSO_ALPHA_ENABLED
+        value: "false"
+      - key: PULSO_ALLOW_SELF_DECLARED_ADULT_PILOT
+        value: "false"
+      - key: PULSO_INVITE_PEPPER
+        generateValue: true
+      - key: PULSO_RATE_LIMIT_PEPPER
+        generateValue: true
