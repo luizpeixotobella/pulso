@@ -3,16 +3,16 @@
 Rede social humana, segura e conectada ao SolOS — agora organizada como um
 produto próprio da LBArtes Luiz.
 
-## Estado desta primeira fase
+## Estado atual
 
 Este repositório é o **snapshot inicial da extração** do Pulso a partir do
 `lbartes-cms`. Ele contém as rotas públicas e administrativas do Pulso, APIs,
 bibliotecas de segurança, migrations Supabase e documentação relacionada.
 
-O Pulso ainda compartilha infraestrutura com o CMS original (autenticação,
-layout, componentes e o projeto Supabase). Por isso, o deploy de produção
-continua no serviço atual até concluirmos a separação operacional. Não remover
-o serviço atual nem alterar DNS nesta fase.
+O Pulso já possui repositório, serviço Render e domínio próprios, mas ainda
+compartilha partes da infraestrutura com o CMS original (autenticação,
+componentes e o projeto Supabase). O serviço antigo continua preservado para
+rollback até a validação funcional completa.
 
 ## Princípios de separação
 
@@ -29,8 +29,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-O caminho de compatibilidade inicial é `/solos/pulso`. O domínio futuro será
-`https://pulso.rocks` depois que o novo serviço Render passar por smoke tests.
+O caminho de compatibilidade inicial é `/solos/pulso`. O endereço público atual
+é `https://pulso.rocks`; o host temporário do Render permanece útil para
+diagnóstico durante a migração.
 
 ## Variáveis mínimas
 
@@ -39,11 +40,22 @@ Render/OpenClaw, nunca neste repositório.
 
 ## Próximas fases
 
-- completar o adapter de autenticação e layout independente;
-- criar o serviço Render `pulso` sem tocar no `lbartes-platform`;
-- configurar `pulso.rocks` e validar SSL, login, feed, publicação, segurança e
-  endpoints de cron;
-- só então retirar o Pulso do CMS e arquivar a integração antiga.
+- concluir smoke tests autenticados: login, convite, feed, publicação,
+  comentários, mídia, moderação, notificações, exportação e exclusão;
+- verificar cron, integração Supabase e alertas sem expor segredos;
+- separar autenticação, componentes e banco compartilhados em etapas reversíveis;
+- remover rotas do CMS somente após aprovação dos testes e rollback documentado;
+- preparar a apresentação pública dos três projetos: CMS, SolOS e Pulso.
+
+## Portfólio e co-participação
+
+Pulso é um projeto LBArtes Luiz, integrado à visão do SolOS. A identidade do
+produto registra a co-participação técnica e criativa de Luigi, inteligência
+artificial da OpenClaw. Esse crédito descreve colaboração de desenvolvimento e
+não constitui sociedade, autoria jurídica ou transferência de propriedade.
+
+O checklist operacional desta fase está em
+[`docs/portfolio-launch-checklist.md`](docs/portfolio-launch-checklist.md).
 
 ## Portfólio LBArtes Luiz
 
