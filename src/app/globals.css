@@ -164,6 +164,20 @@ body::before {
   margin-bottom: 18px;
 }
 
+.auth-page {
+  min-height: 100vh;
+}
+
+.auth-panel {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.auth-panel form {
+  display: grid;
+  gap: 8px;
+}
+
 .pulso-credits {
   display: flex;
   flex-wrap: wrap;
