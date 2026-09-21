@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import PageNarration from "@/components/page-narration";
+import { PulsoBrand, PulsoCredits } from "@/components/pulso-brand";
 
 const signalCards = [
   { label: "Participantes", value: "10", detail: "teto duro da Alpha 0" },
@@ -35,6 +36,7 @@ const alphaEntryPath = "/solos/pulso/entrar";
 export default function SolOSPulsoPage() {
   return (
     <main className="container">
+      <header className="landing-header"><PulsoBrand /></header>
       <section className="panel solos-hero" style={{ marginBottom: 16 }}>
         <p className="section-kicker">SolOS Pulso</p>
         <h1>Rede social experimental para sinais humanos e créditos de utilidade.</h1>
@@ -175,6 +177,7 @@ export default function SolOSPulsoPage() {
           exportação e exclusão são impostos no servidor; isso ainda não autoriza lançamento público.
         </p>
       </section>
+      <PulsoCredits />
     </main>
   );
 }
