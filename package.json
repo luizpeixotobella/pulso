@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "links:check": "node scripts/check_public_links.mjs",
     "audio:generate": "node scripts/generate_cms_narrations.mjs",
     "audio:courses": "node scripts/generate_course_podcasts.mjs",
     "audio:upload": "node scripts/upload_generated_audio.mjs"

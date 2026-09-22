@@ -29,6 +29,16 @@ cp .env.example .env.local
 npm run dev
 ```
 
+Para auditar os destinos internos do Pulso no domínio live:
+
+```bash
+npm run links:check
+```
+
+O verificador aceita redirecionamentos e respostas protegidas (`401`, `403`,
+`405`), mas falha em `404`, `5xx` ou timeout. Assim, links herdados do CMS
+voltam a ser detectados antes de uma nova publicação.
+
 O caminho de compatibilidade inicial é `/solos/pulso`. O endereço público atual
 é `https://pulso.rocks`; o host temporário do Render permanece útil para
 diagnóstico durante a migração.
