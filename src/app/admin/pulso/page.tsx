@@ -64,17 +64,14 @@ export default async function PulsoAdminPage({ searchParams }: Props) {
           comentários, tema periódico e resposta de uma palavra com validação.
         </p>
         <div className="action-row" style={{ marginTop: 12 }}>
-          <Link className="btn" href="/admin">
-            Voltar ao Admin
+          <Link className="btn" href="/solos/pulso">
+            Voltar ao Pulso
           </Link>
           <Link className="btn" href="/solos">
             Ver página SolOS
           </Link>
           <Link className="btn primary" href="/admin/pulso/seguranca">
             Trust & Safety
-          </Link>
-          <Link className="btn" href="/admin/ghost">
-            Ghost Brain Monitor
           </Link>
         </div>
       </section>
