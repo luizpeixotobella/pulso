@@ -12,6 +12,7 @@
 - [x] Auditoria live de destinos internos: 17/17 válidos em `pulso.rocks`.
 - [x] Links herdados do CMS removidos; a checagem agora falha se eles regressarem.
 - [x] Gate anônimo de APIs: cron sem segredo retorna `401`; exportação/notificações sem sessão retornam `401`; mutações acessadas por `GET` retornam `405`.
+- [x] Mutação de notificações protegida por origem confiável; endpoints de sessão mantêm rejeição CSRF (`PATCH /api/solos/pulso/notifications`).
 
 ## Gate funcional pendente
 

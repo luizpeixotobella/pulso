@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { exceedsRequestSize, isRateLimited, requestIp } from "@/lib/request-guard";
+import { exceedsRequestSize, hasTrustedMutationOrigin, isRateLimited, requestIp } from "@/lib/request-guard";
 
 async function currentUser() {
   const supabase = await createClient();
@@ -44,6 +44,7 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  if (!hasTrustedMutationOrigin(request)) return NextResponse.json({ error: "invalid_origin" }, { status: 403 });
   if (exceedsRequestSize(request, 4096)) return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
   if (isRateLimited(`pulso-notifications-write:${requestIp(request)}`, 30, 60_000)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
