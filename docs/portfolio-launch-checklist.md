@@ -9,6 +9,8 @@
 - [x] Variáveis individuais aplicadas no Render; rotas que davam `500` voltaram a `200`.
 - [x] CMS antigo preservado para rollback.
 - [x] Logo e favicon publicados no commit `c64ecd4`.
+- [x] Auditoria live de destinos internos: 17/17 válidos em `pulso.rocks`.
+- [x] Links herdados do CMS removidos; a checagem agora falha se eles regressarem.
 
 ## Gate funcional pendente
 

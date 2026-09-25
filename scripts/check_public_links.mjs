@@ -16,7 +16,21 @@ for (const file of files) {
 }
 
 const accepted = (status) => status >= 200 && status < 400 || [401, 403, 405].includes(status);
+const forbiddenCmsPaths = [
+  "/admin/ghost",
+  "/blog",
+  "/forum",
+  "/produtos/solos-heart-pass",
+  "/solos/fundadores",
+];
 let failures = 0;
+
+for (const path of forbiddenCmsPaths) {
+  if (paths.has(path)) {
+    console.error(`FAIL legacy CMS destination still referenced: ${path}`);
+    failures += 1;
+  }
+}
 
 for (const path of [...paths].sort()) {
   let status = 0;
