@@ -13,6 +13,7 @@
 - [x] Links herdados do CMS removidos; a checagem agora falha se eles regressarem.
 - [x] Gate anônimo de APIs: cron sem segredo retorna `401`; exportação/notificações sem sessão retornam `401`; mutações acessadas por `GET` retornam `405`.
 - [x] Mutação de notificações protegida por origem confiável; endpoints de sessão mantêm rejeição CSRF (`PATCH /api/solos/pulso/notifications`).
+- [x] Helper RLS de bloqueios não é mais executável por `anon`; a função fica restrita a `authenticated`.
 
 ## Gate funcional pendente
 
