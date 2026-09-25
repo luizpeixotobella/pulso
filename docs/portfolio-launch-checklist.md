@@ -11,6 +11,7 @@
 - [x] Logo e favicon publicados no commit `c64ecd4`.
 - [x] Auditoria live de destinos internos: 17/17 válidos em `pulso.rocks`.
 - [x] Links herdados do CMS removidos; a checagem agora falha se eles regressarem.
+- [x] Gate anônimo de APIs: cron sem segredo retorna `401`; exportação/notificações sem sessão retornam `401`; mutações acessadas por `GET` retornam `405`.
 
 ## Gate funcional pendente
 
