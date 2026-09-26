@@ -39,6 +39,6 @@
 
 - [ ] Revisar screenshots, descrição e links do CMS, SolOS e Pulso.
 - [ ] Preparar a página de serviços no Squarespace.
-- [ ] Preparar publicação no LinkedIn; publicar somente após aprovação humana.
-- [ ] Explicar a co-participação técnica/criativa de Luigi sem sugerir sociedade
+- [x] Publicar no LinkedIn uma apresentação de LBArtes Platform, SolOS, Pulso e áreas de serviço após pedido direto de Luiz; a publicação apareceu no feed em 25/09/2026. O permalink ainda precisa ser registrado.
+- [x] Explicar a contribuição técnica/criativa de Luigi sem sugerir sociedade
       ou propriedade jurídica.
