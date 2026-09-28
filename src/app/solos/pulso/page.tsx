@@ -2,6 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import PageNarration from "@/components/page-narration";
 import { PulsoBrand, PulsoCredits } from "@/components/pulso-brand";
+import SoftwareStructuredData from "@/components/software-structured-data";
+
+export const metadata = {
+  title: "Conheça o Pulso",
+  description: "Veja como funciona o Pulso, uma rede social experimental invite-only com regras claras, participação consentida e revisão humana.",
+  alternates: { canonical: "/solos/pulso" },
+};
 
 const signalCards = [
   { label: "Participantes", value: "10", detail: "teto duro da Alpha 0" },
@@ -36,6 +43,7 @@ const alphaEntryPath = "/solos/pulso/entrar";
 export default function SolOSPulsoPage() {
   return (
     <main className="container">
+      <SoftwareStructuredData />
       <header className="landing-header"><PulsoBrand /></header>
       <section className="panel solos-hero" style={{ marginBottom: 16 }}>
         <p className="section-kicker">SolOS Pulso</p>

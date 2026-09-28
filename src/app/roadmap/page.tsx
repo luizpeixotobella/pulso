@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Roadmap do Pulso",
+  description: "Acompanhe as etapas e os limites públicos do desenvolvimento do Pulso.",
+  alternates: { canonical: "/roadmap" },
+};
+
 const roadmap = [
   ["Entregue · Pulso independente", "Repositório próprio, deploy no Render, domínio pulso.rocks, identidade visual e ambiente protegido."],
   ["Em validação · Alpha 0.2", "Convites adultos verificados, feed em lotes, publicação com pré-moderação humana, comentários, reações e mídia leve."],

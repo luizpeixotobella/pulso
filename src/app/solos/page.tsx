@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "SolOS e Pulso",
+  description: "Conheça o SolOS e o Pulso: um ecossistema experimental com foco em agência humana, participação consentida e segurança.",
+  alternates: { canonical: "/solos" },
+};
+
 export default function SolosPage() {
   return (
     <main className="container">

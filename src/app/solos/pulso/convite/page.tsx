@@ -3,7 +3,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import PulsoInviteClient from "./invite-client";
 
-export const metadata = { title: "Convite Alpha 0 | SolOS Pulso" };
+export const metadata = {
+  title: "Convite do Pulso",
+  robots: { index: false, follow: false },
+};
 
 type Props = { searchParams: Promise<{ token?: string }> };
 

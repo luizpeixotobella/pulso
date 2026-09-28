@@ -4,6 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getPulsoAlphaAccess } from "@/lib/pulso-alpha";
 import { redeemGhostQueries, redeemHeartPassDiscount } from "./actions";
 
+export const metadata = {
+  title: "Recompensas",
+  robots: { index: false, follow: false },
+};
+
 type Props = { searchParams: Promise<{ redeemed?: string; discounted?: string; error?: string }> };
 
 export default async function PulsoRewardsPage({ searchParams }: Props) {

@@ -3,7 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getPulsoAlphaAccess } from "@/lib/pulso-alpha";
 import PulsoProfileClient from "./profile-client";
 
-export const metadata = { title: "Meu perfil | SolOS Pulso" };
+export const metadata = {
+  title: "Meu perfil",
+  robots: { index: false, follow: false },
+};
 
 export default async function PulsoProfilePage() {
   const supabase = await createClient();

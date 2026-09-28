@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ff6078"/>
+      <stop offset=".52" stop-color="#b8a9f4"/>
+      <stop offset="1" stop-color="#f3ef63"/>
+    </linearGradient>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#fff9f4"/>
+      <stop offset=".55" stop-color="#f3ef63"/>
+      <stop offset="1" stop-color="#ff9fbc"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="36" fill="#171019"/>
+  <circle cx="218" cy="315" r="185" fill="url(#accent)" opacity=".11"/>
+  <path d="M119 356V270c0-57 46-103 103-103s103 46 103 103v86" fill="none" stroke="url(#accent)" stroke-width="21" stroke-linecap="round"/>
+  <path d="M72 352h57l21-44 29 84 31-115 25 76 21-42h73" fill="none" stroke="url(#pulse)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="222" cy="167" r="10" fill="#f3ef63"/>
+  <text x="435" y="260" fill="#fff9f4" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="4">PULSO</text>
+  <text x="439" y="330" fill="#e8def5" font-family="Arial, Helvetica, sans-serif" font-size="29">Conversa humana. Segurança. Participação consentida.</text>
+  <text x="441" y="412" fill="#b8a9f4" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="3">LBARTES LUIZ · EXPERIÊNCIA EXPERIMENTAL</text>
+</svg>

@@ -3,6 +3,11 @@ import { PulsoBrand } from "@/components/pulso-brand";
 import { safeAuthNext } from "@/lib/auth-next";
 import LoginForm from "./login-form";
 
+export const metadata = {
+  title: "Entrar",
+  robots: { index: false, follow: true },
+};
+
 type Props = { searchParams: Promise<{ next?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {

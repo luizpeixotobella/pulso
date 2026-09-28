@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Política de Privacidade do Pulso",
+  description: "Leia como o Pulso trata dados de conta, participação, convites, moderação e solicitações de titulares.",
+  alternates: { canonical: "/privacy-policy" },
+};
+
 export default function PrivacyPolicyPage() {
   return (
     <main className="container">

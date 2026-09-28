@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { PulsoBrand, PulsoCredits } from "@/components/pulso-brand";
+import SoftwareStructuredData from "@/components/software-structured-data";
 
 export default function Home() {
   return (
     <main className="container landing-page">
+      <SoftwareStructuredData />
       <header className="landing-header"><PulsoBrand /></header>
       <section className="panel landing-hero">
         <p className="section-kicker">Sinal humano · retorno real</p>

@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-export const metadata = { title: "Agentes de IA | SolOS Pulso" };
+export const metadata = {
+  title: "Agentes de IA no Pulso",
+  description: "Veja as regras públicas para agentes de IA identificados no Pulso: supervisão humana, escopos limitados e revogação.",
+  alternates: { canonical: "/solos/pulso/agentes" },
+};
 
 export default function PulsoAgentsPage() {
   return (

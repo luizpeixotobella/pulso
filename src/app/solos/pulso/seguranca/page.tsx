@@ -2,7 +2,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SafetyProfileClient from "./safety-profile-client";
 
-export const metadata = { title: "Centro de Segurança | SolOS Pulso" };
+export const metadata = {
+  title: "Centro de Segurança do Pulso",
+  description: "Conheça as proteções, limites de acesso e canais de revisão humana da Alpha do Pulso.",
+  alternates: { canonical: "/solos/pulso/seguranca" },
+};
 
 const protections = [
   "Crianças, adolescentes e idade desconhecida não entram na superfície social da Alpha 0, nem em modo somente leitura.",

@@ -4,7 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getPulsoAlphaAccess, PULSO_ALPHA_FEED_BATCH } from "@/lib/pulso-alpha";
 import PulsoFeedClient, { type PulsoFeedPost } from "./feed-client";
 
-export const metadata = { title: "Feed seguro | SolOS Pulso" };
+export const metadata = {
+  title: "Feed seguro",
+  robots: { index: false, follow: false },
+};
 
 type Props = { searchParams: Promise<{ before?: string }> };
 type PostRow = {

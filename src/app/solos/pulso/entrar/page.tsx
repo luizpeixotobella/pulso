@@ -3,7 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getPulsoAlphaAccess } from "@/lib/pulso-alpha";
 import InviteEntry from "./invite-entry";
 
-export const metadata = { title: "Participar do Pulso | LBArtes" };
+export const metadata = {
+  title: "Como participar do Pulso",
+  description: "Consulte as etapas para manifestar interesse na Alpha invite-only do Pulso.",
+  alternates: { canonical: "/solos/pulso/entrar" },
+};
 const next = encodeURIComponent("/solos/pulso/entrar");
 const interest = "mailto:contato@luiz-bella-artes.net?subject=Interesse%20no%20Pulso&body=Gostaria%20de%20saber%20como%20participar%20da%20Alpha%20do%20Pulso.%20Entendo%20que%20criar%20conta%20n%C3%A3o%20libera%20o%20acesso%20social.";
 

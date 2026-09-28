@@ -2,6 +2,11 @@ import { PulsoBrand } from "@/components/pulso-brand";
 import { safeAuthNext } from "@/lib/auth-next";
 import SignupForm from "./signup-form";
 
+export const metadata = {
+  title: "Criar conta",
+  robots: { index: false, follow: true },
+};
+
 type Props = { searchParams: Promise<{ next?: string }> };
 
 export default async function CadastroPage({ searchParams }: Props) {

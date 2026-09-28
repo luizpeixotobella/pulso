@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { PULSO_ALPHA_NOTICE_HASH, PULSO_ALPHA_POLICY_VERSION, PULSO_SOCIAL_NOTICE_HASH, PULSO_SOCIAL_POLICY_VERSION, PULSO_VALUE_LOOP_NOTICE_HASH, PULSO_VALUE_LOOP_POLICY_VERSION } from "@/lib/pulso-alpha";
 
-export const metadata = { title: "Regras da Alpha 0.2 | SolOS Pulso" };
+export const metadata = {
+  title: "Regras do Pulso",
+  description: "Consulte as regras de participação, segurança e moderação da Alpha do Pulso.",
+  alternates: { canonical: "/solos/pulso/regras" },
+};
 
 const prohibited = [
   "qualquer participação de criança, adolescente ou pessoa sem condição adulta aferida",
