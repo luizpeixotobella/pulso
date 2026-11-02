@@ -19,7 +19,7 @@ export type PulsoFeedPost = {
 };
 
 type Topic = { id: string; title: string; prompt: string; endsAt: string | null; suggestedByGhost: boolean };
-type Props = { showComposer?: boolean; posts: PulsoFeedPost[]; topics: Topic[]; canRead: boolean; canPublish: boolean; canInteract: boolean; valueLoopConsent: boolean; accessReason: string; nextHref: string | null };
+type Props = { communityOnly?: boolean; showComposer?: boolean; posts: PulsoFeedPost[]; topics: Topic[]; canRead: boolean; canPublish: boolean; canInteract: boolean; valueLoopConsent: boolean; accessReason: string; nextHref: string | null };
 
 const reactionLabels: Record<string, string> = {
   like: "♥ Curti",
@@ -69,7 +69,7 @@ function CommentThread({ comments, parentId = null, onReply }: { comments: Pulso
   );
 }
 
-export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = false }: { post: PulsoFeedPost; canInteract: boolean; onMessage?: (message: string) => void; readOnly?: boolean }) {
+export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = false, allowRepost = true }: { post: PulsoFeedPost; canInteract: boolean; onMessage?: (message: string) => void; readOnly?: boolean; allowRepost?: boolean }) {
   const router = useRouter();
   const [comment, setComment] = useState("");
   const [replyTo, setReplyTo] = useState<PulsoFeedComment | null>(null);
@@ -129,7 +129,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
       ) : null}
       <div className="action-row reaction-row" style={{ marginTop: 14 }}>
         {Object.entries(reactionLabels).map(([type, label]) => <button key={type} className="btn" type="button" aria-pressed={post.ownReactions.includes(type)} disabled={!canInteract} onClick={() => react(type)} style={post.ownReactions.includes(type) ? { borderColor: "var(--accent-2)" } : undefined}>{label} · {post.reactions[type] ?? 0}</button>)}
-        {canInteract && !post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
+        {allowRepost && canInteract && !post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
       </div>
       <section style={{ marginTop: 16 }}>
         <h3>{post.comments.length} {post.comments.length === 1 ? "comentário" : "comentários"}</h3>
@@ -149,7 +149,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
   );
 }
 
-export default function PulsoFeedClient({ showComposer = true, posts, topics, canRead, canPublish, canInteract, valueLoopConsent, accessReason, nextHref }: Props) {
+export default function PulsoFeedClient({ communityOnly = false, showComposer = true, posts, topics, canRead, canPublish, canInteract, valueLoopConsent, accessReason, nextHref }: Props) {
   const router = useRouter();
   const composerRef = useRef<HTMLFormElement>(null);
   const [text, setText] = useState("");
@@ -157,6 +157,7 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
   const [image, setImage] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [publicContext, setPublicContext] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [valueLoopChecked, setValueLoopChecked] = useState(false);
 
@@ -185,11 +186,11 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
   }
   async function publish(event: FormEvent) {
     event.preventDefault(); setBusy(true); setMessage(null);
-    const form = new FormData(); form.set("text", text); if (topicId) form.set("topicId", topicId); if (image) form.set("image", image);
+    const form = new FormData(); form.set("text", text); form.set("publicContext", String(publicContext)); if (topicId) form.set("topicId", topicId); if (image) form.set("image", image);
     const response = await fetch("/api/solos/pulso/posts", { method: "POST", body: form });
     const result = await response.json().catch(() => ({})) as { error?: string };
     setBusy(false);
-    if (response.status === 202) { setText(""); setImage(null); setMessage("Recebido. Texto e imagem permanecem ocultos até a revisão humana."); return; }
+    if (response.status === 202) { setText(""); setImage(null); setPublicContext(false); setMessage("Recebido. Seu conteúdo permanece oculto até a revisão humana."); return; }
     if (response.status === 422) { setText(""); setImage(null); setMessage("O conteúdo não entrou por segurança."); return; }
     if (result.error === "image_too_large") return setMessage("A imagem original precisa ter no máximo 3 MB.");
     setMessage(result.error === "social_consent_required" ? "Aceite a atualização Alpha 0.1 antes de publicar." : "Não foi possível enviar para revisão agora.");
@@ -199,7 +200,7 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
   }
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      {canRead && !canInteract ? (
+      {!communityOnly && canRead && !canInteract ? (
         <section className="panel">
           <p className="section-kicker">Aceite suplementar · Alpha 0.1</p>
           <h2>O feed antigo continua. Os novos sinais dependem da sua escolha.</h2>
@@ -208,7 +209,7 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
           <button className="btn primary" type="button" disabled={!consentChecked || busy} onClick={acceptConsent}>{busy ? "Registrando…" : "Aceitar Alpha 0.1"}</button>
         </section>
       ) : null}
-      {canInteract && !valueLoopConsent ? (
+      {!communityOnly && canInteract && !valueLoopConsent ? (
         <section className="panel">
           <p className="section-kicker">Aceite opcional · Value Loop Alpha 0.2</p>
           <h2>Seu sinal pode voltar como utilidade.</h2>
@@ -218,7 +219,7 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
           <button className="btn primary" type="button" disabled={!valueLoopChecked || busy} onClick={() => setValueLoop(true)}>{busy ? "Registrando…" : "Ativar Value Loop"}</button>
         </section>
       ) : null}
-      {canInteract && valueLoopConsent ? (
+      {!communityOnly && canInteract && valueLoopConsent ? (
         <section className="panel">
           <div className="section-head"><div><p className="section-kicker">Value Loop ativo</p><h2>Sinal → crédito → benefício</h2></div><Link className="btn primary" href="/solos/pulso/recompensas">Ver saldo e extrato</Link></div>
           <p>O motor diário credita apenas participação humana qualificada. Você pode interromper ganhos futuros sem perder o acesso social.</p>
@@ -234,11 +235,11 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
       )) : null}
       {showComposer && canRead && canPublish && canInteract ? (
         <form ref={composerRef} className="panel comment-form" onSubmit={publish}>
-          <p className="section-kicker">Compartilhar no piloto</p>
+          <p className="section-kicker">{communityOnly ? "Compartilhar na comunidade pública" : "Compartilhar no piloto privado"}</p>
           {topics.length ? <label>Tema opcional<select value={topicId} onChange={(event) => setTopicId(event.target.value)}><option value="">Sem tema</option>{topics.map((topic) => <option key={topic.id} value={topic.id}>{topic.title}</option>)}</select></label> : null}
           <label>O que está pulsando?<textarea rows={4} maxLength={1000} value={text} onChange={(event) => setText(event.target.value)} required={!image} /></label>
-          <label>Imagem opcional<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImage(event.target.files?.[0] ?? null)} /></label>
-          <p style={{ fontSize: 13 }}>Original até 3 MB. O servidor remove metadados, converte para WebP privado e busca ficar abaixo de 1 MB. Texto e imagem só aparecem após decisão humana.</p>
+          {!communityOnly ? <><label>Imagem opcional<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImage(event.target.files?.[0] ?? null)} /></label>
+          <p style={{ fontSize: 13 }}>Original até 3 MB. O servidor remove metadados, converte para WebP privado e busca ficar abaixo de 1 MB. Texto e imagem só aparecem após decisão humana.</p></> : <><p>Conteúdo geral, em texto. Não envie seu nome completo, escola, telefone, endereço ou outros dados pessoais. Só aparece após revisão humana.</p><label className="consent-checkbox"><input type="checkbox" checked={publicContext} onChange={e => setPublicContext(e.target.checked)} required /><span>Entendo que este texto será público após aprovação, inclusive para quem não tem conta.</span></label></>}
           <button className="btn primary" type="submit" disabled={busy}>{busy ? "Protegendo…" : "Enviar para revisão"}</button>
         </form>
       ) : showComposer && canRead && !canPublish ? (
@@ -249,7 +250,7 @@ export default function PulsoFeedClient({ showComposer = true, posts, topics, ca
       {message ? <p className="panel" style={{ color: "var(--accent-2)" }}>{message}</p> : null}
       {canRead ? <section style={{ display: "grid", gap: 14 }}>
         {posts.length === 0 ? <article className="panel"><h2>O feed seguro começa vazio.</h2><p>O tema ativo já oferece uma primeira pergunta; o conteúdo só aparece depois da revisão.</p></article> : null}
-        {posts.map((post) => <PostCard key={post.id} post={post} canInteract={canInteract} onMessage={setMessage} />)}
+        {posts.map((post) => <PostCard key={post.id} post={post} canInteract={canInteract} allowRepost={!communityOnly} onMessage={setMessage} />)}
         {nextHref ? <div className="action-row"><Link className="btn" href={nextHref}>Pedir mais 12</Link><span style={{ color: "var(--muted)", fontSize: 13 }}>O próximo lote só abre quando você escolher.</span></div> : posts.length ? <p className="panel">Você chegou ao fim deste feed.</p> : null}
       </section> : null}
     </div>

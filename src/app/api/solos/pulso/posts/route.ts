@@ -22,14 +22,17 @@ export async function POST(request: Request) {
   let text = "";
   let topicId: string | null = null;
   let imageFile: File | null = null;
+  let publicContext = false;
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData().catch(() => null);
+    publicContext = form?.get("publicContext") === "true";
     text = String(form?.get("text") ?? "").trim();
     topicId = String(form?.get("topicId") ?? "").trim() || null;
     const candidate = form?.get("image");
     imageFile = candidate instanceof File && candidate.size > 0 ? candidate : null;
   } else {
-    const body = await request.json().catch(() => null) as { text?: string; topicId?: string } | null;
+    const body = await request.json().catch(() => null) as { text?: string; topicId?: string; publicContext?: boolean } | null;
+    publicContext = body?.publicContext === true;
     text = body?.text?.trim() ?? "";
     topicId = body?.topicId?.trim() || null;
   }
@@ -44,6 +47,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "social_consent_required", next: "/solos/pulso/regras" }, { status: 403 });
   }
 
+  if (!access.isVerifiedMember && (!publicContext || imageFile || topicId)) return NextResponse.json({ error: !publicContext ? "public_context_required" : "community_text_only" }, { status: 400 });
+
   const admin = createAdminClient();
   let storedImage: StoredPulsoImage | null = null;
   try {
@@ -54,7 +59,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: code }, { status });
   }
   const moderation = await moderatePulsoContent(text, storedImage?.buffer);
-  const { data, error } = await admin.rpc("pulso_alpha_submit_post_v2", {
+  const { data, error } = await admin.rpc(access.isVerifiedMember ? "pulso_alpha_submit_post_v2" : "pulso_community_submit_post", {
     p_user_id: user.id,
     p_body: text,
     p_topic_id: topicId,

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const postId = body?.postId?.trim() ?? "";
   if (!UUID.test(postId)) return NextResponse.json({ error: "invalid_block" }, { status: 400 });
   const admin = createAdminClient();
-  const { data: post } = await admin.from("pulso_posts").select("author_id").eq("id", postId).maybeSingle();
+  const { data: post } = await supabase.from("pulso_posts").select("author_id").eq("id", postId).maybeSingle();
   const blockedId = post?.author_id ?? "";
   if (!UUID.test(blockedId) || blockedId === user.id) return NextResponse.json({ error: "invalid_block" }, { status: 400 });
   const { error } = await admin.from("pulso_user_blocks").upsert({ blocker_id: user.id, blocked_id: blockedId }, { onConflict: "blocker_id,blocked_id" });

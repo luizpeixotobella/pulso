@@ -30,7 +30,7 @@ export async function authorizePulsoAgent(request: Request, requiredScope: "read
   const expected = Buffer.from(agent.token_hash, "utf8");
   if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return null;
   const access = await getPulsoAlphaAccess(agent.owner_user_id);
-  if (!access.canInteract) return null;
+  if (!access.isVerifiedMember || !access.canInteract) return null;
 
   await admin.from("pulso_ai_agents").update({ last_used_at: new Date().toISOString() }).eq("id", agent.id);
   return {

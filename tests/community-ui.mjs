@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+const req = createRequire(import.meta.url);
+const link = ({children,...props}) => React.createElement('a',props,children);
+function load(file) {
+ const mod={exports:{}};
+ const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
+ vm.runInNewContext(code,{exports:mod.exports,require:name=>name==='next/link'?link:name==='next/navigation'?{useRouter:()=>({refresh(){},push(){}})}:name==='next/image'?()=>null:name==='@/lib/supabase/browser'?{createClient(){throw Error('No auth call during render')}}:name.startsWith('@/lib/')?load('src/lib/'+name.slice(6)+'.ts'):req(name)});
+ return mod.exports;
+}
+const policy=load('src/lib/pulso-community-policy.ts');
+assert.equal(createHash('sha256').update(policy.COMMUNITY_NOTICE).digest('hex'),policy.COMMUNITY_NOTICE_HASH);
+const Signup=load('src/app/cadastro/signup-form.tsx').default;
+const signup=renderToStaticMarkup(React.createElement(Signup));
+assert.match(signup,/<input(?=[^>]*name="community_acceptance")(?=[^>]*required)[^>]*>/);
+assert.match(signup,/Tenho 17 anos ou mais/);
+assert.ok(!signup.includes('Declaro ter 18'));
+const Feed=load('src/app/solos/pulso/feed/feed-client.tsx').default;
+const html=renderToStaticMarkup(React.createElement(Feed,{communityOnly:true,posts:[],topics:[],canRead:true,canPublish:true,canInteract:true,valueLoopConsent:false,accessReason:'ready',nextHref:null}));
+assert.match(html,/Compartilhar na comunidade pública/);
+assert.match(html,/este texto será público após aprovação/);
+assert.match(html,/Enviar para revisão/);
+assert.ok(!html.includes('type="file"'));
+assert.ok(!html.includes('Ativar Value Loop'));
+assert.ok(!html.includes('Aceitar Alpha'));
+console.log('PASS: versioned notice hash, required 17+ consent, public acknowledged text composer, no media/financial/legacy enrollment');

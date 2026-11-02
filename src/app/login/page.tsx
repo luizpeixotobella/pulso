@@ -11,7 +11,7 @@ type Props = { searchParams: Promise<{ next?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {
   const { next } = await searchParams;
-  const nextPath = safeAuthNext(next);
+  const nextPath = safeAuthNext(next ?? "/solos/pulso/feed");
   return (
     <main className="container auth-page">
       <section className="panel auth-panel">

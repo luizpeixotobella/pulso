@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LBArtesDiscovery } from "@/components/pulso-brand";
 import { PULSO_PUBLIC_SCOPE, PULSO_MEMBER_SCOPE } from "@/lib/pulso-feed-scope";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,8 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return <PulsoPublicTimeline before={before} />;
   const access = await getPulsoAlphaAccess(user.id);
-  if (!access.canReadFeed) return <PulsoPublicTimeline before={before} />;
+  if (!access.canReadFeed) redirect("/solos/pulso/entrar");
+  const communityOnly = !access.isVerifiedMember;
   const batchSize = Math.min(PULSO_ALPHA_FEED_BATCH, access?.settings?.feed_batch_size ?? PULSO_ALPHA_FEED_BATCH);
   const cursor = before && Number.isFinite(Date.parse(before)) ? before : null;
   let posts: PostRow[] = [];
@@ -36,13 +38,13 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
       .select("id,author_id,topic_id,body,media_type,media_path,media_bytes,repost_of,visibility,agent_id,comments_enabled,created_at")
       .eq("status", "published")
       .eq("moderation_status", "allowed")
-      .or(publicOnly ? PULSO_PUBLIC_SCOPE : PULSO_MEMBER_SCOPE)
+      .or(publicOnly || communityOnly ? PULSO_PUBLIC_SCOPE : PULSO_MEMBER_SCOPE)
       .order("created_at", { ascending: false })
       .limit(batchSize + 1);
     if (cursor) query = query.lt("created_at", cursor);
     const [{ data }, { data: topicRows }] = await Promise.all([
       query,
-      publicOnly ? Promise.resolve({ data: [] }) : supabase.from("pulso_topics").select("id,title,prompt,ends_at,suggested_by").eq("status", "active").lte("starts_at", new Date().toISOString()).order("starts_at", { ascending: false }).limit(3),
+      publicOnly || communityOnly ? Promise.resolve({ data: [] }) : supabase.from("pulso_topics").select("id,title,prompt,ends_at,suggested_by").eq("status", "active").lte("starts_at", new Date().toISOString()).order("starts_at", { ascending: false }).limit(3),
     ]);
     posts = (data ?? []) as PostRow[];
     topics = topicRows ?? [];
@@ -160,11 +162,12 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
         <p className="section-kicker">{publicOnly ? "Pulso · conversa pública" : "Pulso · seu feed"}</p>
         <h1>Uma conversa só, dentro e fora da sua conta.</h1>
         <p>Os posts públicos e suas respostas são os mesmos da timeline aberta. Conteúdos do piloto privado continuam restritos aos participantes.</p>
-        <p>Feed cronológico em lotes de até 12. Reações têm significado, conversas chegam a réplica e tréplica, imagens são leves e todo conteúdo novo passa por revisão humana.</p>
-        <div className="action-row"><Link className="btn" href="/solos/pulso">Visão do produto</Link><Link className="btn" href="/solos/pulso/perfil">Meu perfil</Link><Link className="btn" href="/solos/pulso/recompensas">Pulso Credits</Link><Link className="btn" href="/solos/pulso/agentes">Agentes de IA</Link><Link className="btn primary" href="/solos/pulso/seguranca">Centro de Segurança</Link>{!user ? <Link className="btn" href="/login?next=/solos/pulso/feed">Entrar</Link> : null}</div>
+        <p>Feed cronológico em lotes de até 12. Reações têm significado, conversas chegam a réplica e tréplica, todo conteúdo novo passa por revisão humana. Na comunidade geral, o envio é em texto.</p>
+        <div className="action-row"><Link className="btn" href="/solos/pulso">Visão do produto</Link><Link className="btn" href="/solos/pulso/perfil">Meu perfil</Link>{!communityOnly ? <><Link className="btn" href="/solos/pulso/recompensas">Pulso Credits</Link><Link className="btn" href="/solos/pulso/agentes">Agentes de IA</Link></> : null}<Link className="btn primary" href="/solos/pulso/seguranca">Centro de Segurança</Link>{!user ? <Link className="btn" href="/login?next=/solos/pulso/feed">Entrar</Link> : null}</div>
       </section>
       <div className="conversation-layout"><div>
       <PulsoFeedClient
+        communityOnly={communityOnly}
         showComposer={!publicOnly}
         posts={presentedPosts}
         topics={topics.map((topic) => ({ id: topic.id, title: topic.title, prompt: topic.prompt, endsAt: topic.ends_at, suggestedByGhost: topic.suggested_by === "ghost_shadow" }))}

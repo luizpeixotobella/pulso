@@ -1,5 +1,6 @@
 "use client";
 
+import { COMMUNITY_NOTICE, COMMUNITY_POLICY_VERSION } from "@/lib/pulso-community-policy";
 import { createClient } from "@/lib/supabase/browser";
 import { safeAuthNext } from "@/lib/auth-next";
 import Link from "next/link";
@@ -14,6 +15,7 @@ export default function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
   const [message, setMessage] = useState<string | null>(null);
 
   async function onSubmit(formData: FormData) {
+    if (formData.get("community_acceptance") !== "on") { setError("Leia e marque o aceite para o cadastro independente de 17 anos ou mais."); return; }
     setLoading(true);
     setError(null);
     setMessage(null);
@@ -25,7 +27,7 @@ export default function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
         password: String(formData.get("password") ?? ""),
         options: {
           emailRedirectTo: redirectTo,
-          data: { display_name: String(formData.get("display_name") ?? "").trim() },
+          data: { display_name: String(formData.get("display_name") ?? "").trim(), community_policy_version: COMMUNITY_POLICY_VERSION, community_accepted: true, community_independent_age: true },
         },
       });
       if (signUpError) {
@@ -49,7 +51,9 @@ export default function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
     <form action={onSubmit}>
       <label>Email<input type="email" name="email" autoComplete="email" required /></label>
       <label>Senha<input type="password" name="password" autoComplete="new-password" minLength={6} required /></label>
-      <label>Nome público (opcional)<input type="text" name="display_name" autoComplete="nickname" /></label>
+      <label>Apelido de cadastro (opcional, não publicado automaticamente)<input type="text" name="display_name" autoComplete="nickname" /></label>
+      <label className="consent-checkbox"><input type="checkbox" name="community_acceptance" required /><span>{COMMUNITY_NOTICE} <Link href="/solos/pulso/regras">Ler regras</Link> · <Link href="/privacy-policy">Privacidade</Link></span></label>
+      <p>Até 16 anos: é necessário vínculo com responsável; esse fluxo ainda não está disponível. Não declare uma idade diferente da sua.</p>
       <button className="btn primary" type="submit" disabled={loading}>
         {loading ? "Criando conta..." : "Criar conta"}
       </button>

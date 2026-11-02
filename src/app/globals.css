@@ -724,3 +724,7 @@ main { padding-bottom: 40px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
+
+.consent-checkbox { display: flex; gap: 12px; align-items: flex-start; margin-block: 16px; line-height: 1.6; }
+.consent-checkbox input { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 4px; }
+.consent-checkbox a { color: var(--accent-rose); }

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const moderation = await moderatePulsoText(description || category);
   const immediate = ["child_safety", "grooming", "sexual_content", "threat"].includes(category) || moderation.decision === "block";
   const admin = createAdminClient();
-  const { data: post } = await admin.from("pulso_posts").select("id,author_id").eq("id", postId).maybeSingle();
+  const { data: post } = await supabase.from("pulso_posts").select("id,author_id").eq("id", postId).maybeSingle();
   if (!post) return NextResponse.json({ received: true });
 
   const { data: report, error } = await admin.from("pulso_safety_reports").insert({

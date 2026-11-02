@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const moderation = await moderatePulsoText(content);
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc("pulso_alpha_submit_comment_v2", {
+  const { data, error } = await admin.rpc(access.isVerifiedMember ? "pulso_alpha_submit_comment_v2" : "pulso_community_submit_comment", {
     p_user_id: user.id,
     p_post_id: postId,
     p_parent_comment_id: parentId,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     p_public_context: body?.publicContext === true,
   });
   if (error) {
-    const known = ["public_context_required", "post_unavailable", "parent_comment_unavailable", "thread_depth_limit", "hourly_comment_limit"].find((code) => error.message.includes(code));
+    const known = ["public_context_required", "post_unavailable", "parent_comment_unavailable", "thread_depth_limit", "hourly_comment_limit", "community_access_required", "posting_closed"].find((code) => error.message.includes(code));
     return NextResponse.json({ error: known ?? "comment_failed" }, { status: known === "hourly_comment_limit" ? 429 : known ? 400 : 500 });
   }
   const result = data as { status?: string } | null;

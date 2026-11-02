@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SafetyProfileClient() {
+export default function SafetyProfileClient({ communityOnly = false }: { communityOnly?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
 
@@ -26,6 +26,7 @@ export default function SafetyProfileClient() {
     if (response.ok) router.refresh();
   }
 
+  if (communityOnly) return <section className="panel"><h2>Seus dados e sua proteção</h2><p>Seu cadastro na comunidade não é verificação de maioridade. Mensagens privadas, descoberta de perfil e personalização estão desativadas. Você pode sair e excluir seus dados sociais.</p><div className="action-row"><a className="btn" href="/api/solos/pulso/me/export">Exportar meus dados</a><button className="btn" type="button" onClick={deleteSocialData}>Excluir meus dados sociais</button></div>{message ? <p role="status">{message}</p> : null}</section>;
   return (
     <form className="panel comment-form" onSubmit={submit}>
       <h2>Configurar proteção</h2>

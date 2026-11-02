@@ -13,7 +13,7 @@ export default function SolosPage() {
         <p className="section-kicker">SolOS · Pulso</p>
         <h1>Um ambiente vivo para agência, cuidado e participação humana.</h1>
         <p>
-          O Pulso é a superfície social experimental do ecossistema SolOS: um espaço invite-only, adulto,
+          O Pulso é a superfície social experimental do ecossistema SolOS: uma comunidade de conteúdo geral, com entrada autônoma e
           consentido e pré-moderado para transformar conversa humana em contexto útil.
         </p>
         <div className="action-row" style={{ marginTop: 14 }}>

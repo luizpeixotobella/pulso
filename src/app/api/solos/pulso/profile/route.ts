@@ -20,6 +20,7 @@ export async function PATCH(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "authentication_required" }, { status: 401 });
   const access = await getPulsoAlphaAccess(user.id);
+  if (!access.isVerifiedMember) return NextResponse.json({ error: "community_profile_private" }, { status: 403 });
   if (!access.canReadFeed) return NextResponse.json({ error: access.reason }, { status: 403 });
   const body = await request.json().catch(() => null) as { displayName?: string; handle?: string; bio?: string } | null;
   const displayName = body?.displayName?.trim() ?? "";

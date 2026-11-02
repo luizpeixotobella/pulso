@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (!UUID.test(postId) || !REACTIONS.has(reaction)) return NextResponse.json({ error: "invalid_reaction" }, { status: 400 });
 
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc("pulso_alpha_toggle_reaction", {
+  const { data, error } = await admin.rpc(access.isVerifiedMember ? "pulso_alpha_toggle_reaction" : "pulso_community_toggle_reaction", {
     p_user_id: user.id,
     p_post_id: postId,
     p_reaction_type: reaction,

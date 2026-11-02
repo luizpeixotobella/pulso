@@ -20,6 +20,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "authentication_required" }, { status: 401 });
   const access = await getPulsoAlphaAccess(user.id);
   if (!access.canInteract) return NextResponse.json({ error: access.canReadFeed ? "social_consent_required" : access.reason }, { status: 403 });
+  if (!access.isVerifiedMember) return NextResponse.json({ error: "reposts_pilot_only" }, { status: 403 });
   const body = await request.json().catch(() => null) as { postId?: string } | null;
   const postId = body?.postId?.trim() ?? "";
   if (!UUID.test(postId)) return NextResponse.json({ error: "invalid_repost" }, { status: 400 });

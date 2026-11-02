@@ -21,7 +21,7 @@ export async function decidePulsoModeration(formData: FormData) {
     p_human_decision: decision,
   });
   if (!error && decision === "block" && mediaPost?.media_path) await removePulsoImage(mediaPost.media_path);
-  revalidatePath("/admin/pulso/seguranca"); revalidatePath("/solos/pulso/feed");
+  revalidatePath("/admin/pulso/seguranca"); revalidatePath("/solos/pulso/feed"); revalidatePath("/timeline");
 }
 
 export async function resolvePulsoReport(formData: FormData) {

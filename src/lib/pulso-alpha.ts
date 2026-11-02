@@ -46,6 +46,7 @@ export type PulsoAlphaAccess = {
   membership: AlphaMembership | null;
   safety: SafetyProfile | null;
   isVerifiedMember: boolean;
+  isCommunityMember: boolean;
   canReadFeed: boolean;
   canPost: boolean;
   canInteract: boolean;
@@ -74,12 +75,13 @@ export function hashPulsoInviteEmail(email: string) {
 export async function getPulsoAlphaAccess(userId: string): Promise<PulsoAlphaAccess> {
   const runtimeEnabled = isPulsoAlphaRuntimeEnabled();
   const admin = createAdminClient();
-  const [{ data: settings }, { data: membership }, { data: safety }, { data: socialConsent }, { data: valueLoopConsent }] = await Promise.all([
+  const [{ data: settings }, { data: membership }, { data: safety }, { data: socialConsent }, { data: valueLoopConsent }, { data: communityEligible }] = await Promise.all([
     admin.from("pulso_alpha_settings").select("alpha_enabled,registrations_open,feed_open,posting_open,kill_switch,max_members,feed_batch_size,jurisdiction,policy_version").eq("id", true).maybeSingle(),
     admin.from("pulso_alpha_memberships").select("status,jurisdiction,adult_assurance_method,policy_version,assurance_expires_at").eq("user_id", userId).maybeSingle(),
     admin.from("pulso_safety_profiles").select("status,age_band,age_assurance,can_publish").eq("user_id", userId).maybeSingle(),
     admin.from("pulso_alpha_consent_receipts").select("id").eq("user_id", userId).eq("purpose_code", "social_signals_and_media").eq("policy_version", PULSO_SOCIAL_POLICY_VERSION).eq("status", "granted").maybeSingle(),
     admin.from("pulso_alpha_consent_receipts").select("id").eq("user_id", userId).eq("purpose_code", "value_loop_rewards").eq("policy_version", PULSO_VALUE_LOOP_POLICY_VERSION).eq("status", "granted").maybeSingle(),
+    admin.rpc("pulso_community_eligible", { p_user_id: userId }),
   ]);
 
   const typedSettings = settings as AlphaSettings | null;
@@ -100,15 +102,16 @@ export async function getPulsoAlphaAccess(userId: string): Promise<PulsoAlphaAcc
       && typedSafety.age_assurance === "verified_adult",
   );
   const alphaOpen = Boolean(runtimeEnabled && typedSettings?.alpha_enabled && !typedSettings.kill_switch);
-  const canReadFeed = Boolean(alphaOpen && typedSettings?.feed_open && isVerifiedMember);
-  const canPost = Boolean(alphaOpen && typedSettings?.posting_open && isVerifiedMember && typedSafety?.can_publish);
-  const canInteract = Boolean(canReadFeed && canPost && socialConsent);
+  const isCommunityMember = communityEligible === true;
+  const canReadFeed = Boolean(alphaOpen && typedSettings?.feed_open && (isVerifiedMember || isCommunityMember));
+  const canPost = Boolean(alphaOpen && typedSettings?.posting_open && ((isVerifiedMember && typedSafety?.can_publish) || isCommunityMember));
+  const canInteract = Boolean(canReadFeed && canPost && (isVerifiedMember ? Boolean(socialConsent) : isCommunityMember));
 
   let reason = "ready";
   if (!runtimeEnabled) reason = "runtime_closed";
   else if (!typedSettings?.alpha_enabled || typedSettings.kill_switch) reason = "alpha_closed";
-  else if (!isVerifiedMember) reason = "verified_invite_required";
   else if (!typedSettings.feed_open) reason = "feed_closed";
+  else if (!isVerifiedMember && !isCommunityMember) reason = "community_acceptance_required";
   else if (!typedSettings.posting_open) reason = "posting_closed";
 
   return {
@@ -117,6 +120,7 @@ export async function getPulsoAlphaAccess(userId: string): Promise<PulsoAlphaAcc
     membership: typedMembership,
     safety: typedSafety,
     isVerifiedMember,
+    isCommunityMember,
     canReadFeed,
     canPost,
     canInteract,
