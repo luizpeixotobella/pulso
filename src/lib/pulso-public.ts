@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getPulsoEditorialImage } from "@/lib/pulso-editorial-images";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PULSO_PUBLIC_SCOPE } from "@/lib/pulso-feed-scope";
@@ -7,7 +8,7 @@ export const PUBLIC_FEED_BATCH = 12;
 
 // Only explicitly public original text and approved, public-context replies.
 // Never send author UUIDs, raw reactions, private media or auth metadata.
-export async function getPublicPulsoPosts(before?: string) {
+async function loadPublicPulsoPosts(before?: string, postId?: string) {
   const admin = createAdminClient();
   const cursor = before && Number.isFinite(Date.parse(before)) ? new Date(before).toISOString() : null;
   let query = admin.from("pulso_posts")
@@ -15,6 +16,7 @@ export async function getPublicPulsoPosts(before?: string) {
     .eq("status", "published").eq("moderation_status", "allowed")
     .or(PULSO_PUBLIC_SCOPE)
     .order("created_at", { ascending: false }).limit(PUBLIC_FEED_BATCH + 1);
+  if (postId) query = query.eq("id", postId);
   if (cursor) query = query.lt("created_at", cursor);
   const { data, error } = await query;
   if (error) throw new Error("public_feed_unavailable");
@@ -58,3 +60,13 @@ export async function getPublicPulsoPosts(before?: string) {
   }));
   return { posts, nextCursor: (data?.length ?? 0) > PUBLIC_FEED_BATCH ? rows.at(-1)?.created_at ?? null : null };
 }
+
+export async function getPublicPulsoPosts(before?: string) { return loadPublicPulsoPosts(before); }
+
+// Dedicated public predicate, not a service-role lookup by ID alone. Metadata
+// and page share a request-memoized result, including rejection of private IDs.
+export const getPublicPulsoPost = cache(async (id: string) => {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+  const feed = await loadPublicPulsoPosts(undefined, id.toLowerCase());
+  return feed.posts[0] ?? null;
+});

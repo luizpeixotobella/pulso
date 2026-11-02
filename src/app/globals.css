@@ -728,3 +728,16 @@ main { padding-bottom: 40px; }
 .consent-checkbox { display: flex; gap: 12px; align-items: flex-start; margin-block: 16px; line-height: 1.6; }
 .consent-checkbox input { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 4px; }
 .consent-checkbox a { color: var(--accent-rose); }
+
+.post-share { margin-top: 16px; }
+.share-panel { padding: 16px; margin-top: 12px; border: 1px solid var(--stroke); border-radius: 12px; background: rgba(0,0,0,.14); }
+.share-panel p { margin-top: 0; font-size: .88rem; }
+.share-panel .btn { font-size: .82rem; }
+.share-copy { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
+.share-copy label { flex: 1; min-width: 0; }
+.share-copy input { margin-bottom: 0; font-size: .8rem; }
+.share-status { font-size: .85rem; color: var(--accent-2); }
+.single-post-page { max-width: 780px; }
+.single-post-title { font-size: 1.1rem; margin-bottom: 18px; }
+.single-post-invite { margin-top: 24px; }
+@media (max-width: 780px) { .share-panel .action-row { display: flex; flex-wrap: wrap; } .share-panel .action-row a, .share-panel .action-row button { width: auto; } .share-copy { flex-direction: column; align-items: stretch; } }

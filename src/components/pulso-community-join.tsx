@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
+import { safeAuthNext } from "@/lib/auth-next";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { COMMUNITY_NOTICE } from "@/lib/pulso-community-policy";
 
-export default function CommunityJoin() {
+export default function CommunityJoin({ nextPath = "/solos/pulso/feed" }: { nextPath?: string }) {
   const router = useRouter();
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -18,7 +19,7 @@ export default function CommunityJoin() {
       if (!response.ok) {
         setError(result.error === "confirmed_email_required" ? "Confirme seu email antes de continuar." : result.error === "account_restricted" ? "Esta conta tem uma restrição. Consulte o Centro de Segurança para pedir revisão." : "A entrada está temporariamente indisponível. Tente novamente mais tarde."); return;
       }
-      router.push("/solos/pulso/feed"); router.refresh();
+      router.push(safeAuthNext(nextPath)); router.refresh();
     } catch { setError("A conexão falhou. Seu aceite pode ser enviado novamente sem duplicar a inscrição."); }
     finally { setBusy(false); }
   }

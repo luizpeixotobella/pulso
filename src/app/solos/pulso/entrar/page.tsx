@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { safeAuthNext } from "@/lib/auth-next";
 import { createClient } from "@/lib/supabase/server";
 import { getPulsoAlphaAccess } from "@/lib/pulso-alpha";
 import CommunityJoin from "@/components/pulso-community-join";
 
 export const metadata = { title: "Participar do Pulso", description: "Entre na comunidade de conteúdo geral: conta, email confirmado e aceite das regras. Sem convite ou aprovação individual.", alternates: { canonical: "/solos/pulso/entrar" } };
-const next = encodeURIComponent("/solos/pulso/entrar");
-export default async function PulsoEntryPage() {
+export default async function PulsoEntryPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const nextPath = safeAuthNext((await searchParams).next ?? "/solos/pulso/feed");
+  const next = encodeURIComponent(`/solos/pulso/entrar?next=${encodeURIComponent(nextPath)}`);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const access = user ? await getPulsoAlphaAccess(user.id) : null;
@@ -14,7 +16,7 @@ export default async function PulsoEntryPage() {
       <p className="section-kicker">Pulso · comunidade aberta</p>
       <h1>Uma conta. Um aceite. Entre na conversa.</h1>
       <p>O Pulso é uma comunidade de conteúdo geral, não uma rede de conteúdo adulto. Não é preciso convite nem aprovação individual para entrar. A confirmação de email continua protegendo sua conta.</p>
-      {!user ? <div className="action-row"><Link className="btn primary" href={`/cadastro?next=${next}`}>Criar minha conta</Link><Link className="btn" href={`/login?next=${next}`}>Já tenho conta</Link></div> : access?.canReadFeed ? <><p>Sua participação está ativa.</p><Link className="btn primary" href="/solos/pulso/feed">Entrar no meu feed</Link></> : !user.email_confirmed_at ? <p role="status">Confirme seu email pelo link recebido e entre novamente. Não é necessária aprovação da equipe.</p> : access?.reason === "community_acceptance_required" ? <CommunityJoin /> : <p role="status">A entrada está temporariamente pausada ou sua conta tem uma restrição. Não crie outra conta para contornar uma restrição. Consulte o Centro de Segurança.</p>}
+      {!user ? <div className="action-row"><Link className="btn primary" href={`/cadastro?next=${next}`}>Criar minha conta</Link><Link className="btn" href={`/login?next=${next}`}>Já tenho conta</Link></div> : access?.canReadFeed ? <><p>Sua participação está ativa.</p><Link className="btn primary" href={nextPath}>Entrar na conversa</Link></> : !user.email_confirmed_at ? <p role="status">Confirme seu email pelo link recebido e entre novamente. Não é necessária aprovação da equipe.</p> : access?.reason === "community_acceptance_required" ? <CommunityJoin nextPath={nextPath} /> : <p role="status">A entrada está temporariamente pausada ou sua conta tem uma restrição. Não crie outra conta para contornar uma restrição. Consulte o Centro de Segurança.</p>}
     </section>
     <section className="panel" style={{ marginTop: 16 }}>
       <h2>Controle do conteúdo, sem fila de convites.</h2>

@@ -9,7 +9,7 @@ import { getPulsoAlphaAccess, PULSO_ALPHA_FEED_BATCH } from "@/lib/pulso-alpha";
 import PulsoFeedClient, { type PulsoFeedPost } from "./feed-client";
 import PulsoPublicTimeline from "@/components/pulso-public-timeline";
 
-type Props = { before?: string; publicOnly?: boolean };
+type Props = { before?: string; publicOnly?: boolean; postId?: string };
 type PostRow = {
   id: string; author_id: string; topic_id: string | null; body: string | null;
   media_type: string; media_path: string | null; media_bytes: number | null;
@@ -21,10 +21,12 @@ type CommentRow = {
 };
 type ReactionRow = { post_id: string; author_id: string; reaction_type: string };
 
-export default async function PulsoFeedView({ before, publicOnly = false }: Props) {
+export default async function PulsoFeedView({ before, publicOnly = false, postId }: Props) {
   const supabase = await createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const focusedPost = postId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(postId) ? postId : null;
+  if (!user && focusedPost) redirect(`/login?next=${encodeURIComponent(`/solos/pulso/feed?post=${focusedPost}#post-${focusedPost}`)}`);
   if (!user) return <PulsoPublicTimeline before={before} />;
   const access = await getPulsoAlphaAccess(user.id);
   if (!access.canReadFeed) redirect("/solos/pulso/entrar");
@@ -42,7 +44,8 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
       .or(publicOnly || communityOnly ? PULSO_PUBLIC_SCOPE : PULSO_MEMBER_SCOPE)
       .order("created_at", { ascending: false })
       .limit(batchSize + 1);
-    if (cursor) query = query.lt("created_at", cursor);
+    if (focusedPost) query = query.eq("id", focusedPost);
+    if (cursor && !focusedPost) query = query.lt("created_at", cursor);
     const [{ data }, { data: topicRows }] = await Promise.all([
       query,
       publicOnly || communityOnly ? Promise.resolve({ data: [] }) : supabase.from("pulso_topics").select("id,title,prompt,ends_at,suggested_by").eq("status", "active").lte("starts_at", new Date().toISOString()).order("starts_at", { ascending: false }).limit(3),

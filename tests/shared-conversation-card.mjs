@@ -36,7 +36,7 @@ for (const html of [guest, member]) {
 }
 assert.ok(!guest.includes('<textarea'));
 assert.ok(!guest.includes('Denunciar'));
-assert.ok(guest.includes('/login?next=%2Fsolos%2Fpulso%2Ffeed%23post-shared-post'));
+assert.ok(guest.includes('/login?next=%2Fp%2Fshared-post'));
 assert.ok(member.includes('<textarea'));
 assert.ok(member.includes('Sua resposta será pública'));
 assert.ok(member.includes('Enviar para revisão'));

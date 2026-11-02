@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export type PulsoFeedComment = {
@@ -70,6 +70,46 @@ function CommentThread({ comments, parentId = null, onReply }: { comments: Pulso
   );
 }
 
+export function postPermalink(id: string, isPublic: boolean) {
+  return isPublic ? `/p/${encodeURIComponent(id)}` : `/solos/pulso/feed?post=${encodeURIComponent(id)}#post-${encodeURIComponent(id)}`;
+}
+
+export function PostShare({ id, isPublic }: { id: string; isPublic: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState("");
+  const panelId = useId();
+  const url = `https://pulso.rocks${postPermalink(id, isPublic)}`;
+  const invite = "Entre na conversa no Pulso";
+  async function copy() {
+    setStatus("");
+    try {
+      await navigator.clipboard.writeText(url);
+      setStatus(isPublic ? "Link copiado!" : "Link restrito copiado. Só participantes autorizados podem abrir.");
+    } catch { setOpen(true); setStatus("Selecione o endereço abaixo para copiar manualmente."); }
+  }
+  async function nativeShare() {
+    setStatus("");
+    if (!navigator.share) { setStatus("Escolha uma rede ou copie o link abaixo."); return; }
+    try { await navigator.share({ title: "Conversa no Pulso", text: invite, url }); }
+    catch (error) { if (!(error && typeof error === "object" && "name" in error && error.name === "AbortError")) setStatus("Não foi possível abrir os aplicativos. Copie o link ou escolha uma rede abaixo."); }
+  }
+  const networks = [
+    ["WhatsApp", `https://wa.me/?text=${encodeURIComponent(`${invite} ${url}`)}`],
+    ["Telegram", `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(invite)}`],
+    ["X", `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(invite)}`],
+    ["Facebook", `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`],
+    ["LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`],
+  ];
+  return <div className="post-share">
+    <button className="btn" type="button" aria-expanded={open} aria-controls={panelId} onClick={() => { setOpen(!open); setStatus(""); }}>{isPublic ? "↗ Compartilhar" : "🔒 Link restrito"}</button>
+    {open ? <div id={panelId} className="share-panel">
+      {!isPublic ? <p>Este post é privado. Copiar o link não abre seu conteúdo para outras pessoas.</p> : <><p>Chame mais gente para esta conversa pública.</p><div className="action-row"><button className="btn" type="button" onClick={nativeShare}>Mais aplicativos…</button>{networks.map(([label, href]) => <a className="btn" key={label} href={href} target="_blank" rel="noopener noreferrer">{label}</a>)}</div></>}
+      <div className="share-copy"><label>Link {isPublic ? "da publicação" : "restrito"}<input type="text" readOnly value={url} onFocus={event => event.target.select()} /></label><button className="btn primary" type="button" onClick={copy}>Copiar link</button></div>
+    </div> : null}
+    {status ? <p className="share-status" role="status">{status}</p> : null}
+  </div>;
+}
+
 export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = false, allowRepost = true }: { post: PulsoFeedPost; canInteract: boolean; onMessage?: (message: string) => void; readOnly?: boolean; allowRepost?: boolean }) {
   const router = useRouter();
   const [comment, setComment] = useState("");
@@ -77,7 +117,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
   const [busy, setBusy] = useState(false);
   const conversationId = post.conversationId ?? post.id;
   const isPublic = post.visibility === "public";
-  const conversationHref = `/solos/pulso/feed#post-${conversationId}`;
+  const conversationHref = postPermalink(conversationId, isPublic);
   const loginHref = `/login?next=${encodeURIComponent(conversationHref)}`;
   async function react(reaction: string) {
     if (!canInteract) return onMessage("Aceite a atualização Alpha 0.1 para reagir.");
@@ -114,7 +154,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
     <article className="panel conversation-card" id={`post-${post.id}`}>
       <div className="section-head">
         <div><strong>{post.authorName}{post.handle ? ` · @${post.handle}` : ""}</strong>{post.original ? <small style={{ display: "block", color: "var(--accent-2)" }}>repassou no Pulso</small> : null}</div>
-        <Link aria-label="Link desta publicação" href={`${isPublic ? "/timeline" : "/solos/pulso/feed"}#post-${conversationId}`} style={{ fontSize: 12, color: "var(--muted)" }}>{new Date(post.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</Link>
+        <Link aria-label="Link desta publicação" href={conversationHref} style={{ fontSize: 12, color: "var(--muted)" }}>{new Date(post.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</Link>
       </div>
       <p className="section-kicker">{isPublic ? "Conversa pública · visível sem login" : "Piloto privado · acesso restrito"}</p>
       {post.agentDisclosure ? <p className="section-kicker">◇ {post.agentDisclosure} · participação identificada de inteligência artificial</p> : null}
@@ -133,6 +173,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
         {Object.entries(reactionLabels).map(([type, label]) => <button key={type} className="btn" type="button" aria-pressed={post.ownReactions.includes(type)} disabled={!canInteract} onClick={() => react(type)} style={post.ownReactions.includes(type) ? { borderColor: "var(--accent-2)" } : undefined}>{label} · {post.reactions[type] ?? 0}</button>)}
         {allowRepost && canInteract && !post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
       </div>
+      <PostShare id={conversationId} isPublic={isPublic} />
       <section style={{ marginTop: 16 }}>
         <h3>{post.comments.length} {post.comments.length === 1 ? "comentário" : "comentários"}</h3>
         <CommentThread comments={post.comments} onReply={canInteract && post.commentsEnabled ? (item) => { setReplyTo(item); setComment(""); } : undefined} />
