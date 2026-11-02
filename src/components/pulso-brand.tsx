@@ -41,6 +41,7 @@ export function PulsoCredits() {
   return (
     <footer className="pulso-credits">
       <a href={`${cms}/?utm_source=pulso&utm_medium=referral&utm_campaign=universo_lbartes&utm_content=footer`}>Um projeto LBArtes Luiz ↗</a>
+      <Link href="/ajuda">Ajuda e atendimento</Link>
       <span aria-hidden="true">·</span>
       <span>Co-participação técnica e criativa: Luigi, inteligência artificial da OpenClaw</span>
     </footer>

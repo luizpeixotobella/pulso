@@ -58,7 +58,7 @@ export default async function PulsoAdminPage({ searchParams }: Props) {
     <main className="container">
       <section className="panel" style={{ marginBottom: 14 }}>
         <p className="section-kicker">SolOS Pulso</p>
-        <h1>Protótipo de rede social para sinais humanos consentidos</h1>
+        <div className="action-row"><Link className="btn" href="/admin/pulso/atendimento">Fila de atendimento humano</Link></div><h1>Protótipo de rede social para sinais humanos consentidos</h1>
         <p>
           O primeiro corte organiza a ideia como uma rede fechada para usuários SolOS: feed, vídeo, curtidas,
           comentários, tema periódico e resposta de uma palavra com validação.

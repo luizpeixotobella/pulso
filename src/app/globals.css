@@ -741,3 +741,20 @@ main { padding-bottom: 40px; }
 .single-post-title { font-size: 1.1rem; margin-bottom: 18px; }
 .single-post-invite { margin-top: 24px; }
 @media (max-width: 780px) { .share-panel .action-row { display: flex; flex-wrap: wrap; } .share-panel .action-row a, .share-panel .action-row button { width: auto; } .share-copy { flex-direction: column; align-items: stretch; } }
+
+.support-page { max-width: 1060px; }
+.support-page > .panel, .support-grid { margin-bottom: 24px; }
+.support-intro h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+.support-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.support-page label, .support-admin label { display: block; margin-top: 16px; }
+.support-page select, .support-admin select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--stroke); color: var(--text); background: var(--panel); margin-top: 8px; }
+.support-note, .support-contact-text { font-size: .88rem; overflow-wrap: anywhere; }
+.support-human, .support-faq, #acompanhar, #solicitacao { scroll-margin-top: 24px; }
+.support-feedback { color: var(--accent-2); min-height: 1.5em; }
+.support-receipt, .support-thread { overflow-wrap: anywhere; }
+.support-message { white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; margin-block: 16px; border: 1px solid var(--stroke); border-radius: 12px; }
+.support-faq details { border-bottom: 1px solid var(--stroke); padding-block: 18px; }
+.support-faq summary { cursor: pointer; font-weight: 600; line-height: 1.5; }
+.support-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.support-admin .panel { margin-bottom: 24px; overflow-wrap: anywhere; }
+@media (max-width: 780px) { .support-grid { grid-template-columns: minmax(0, 1fr); } }
