@@ -1,4 +1,4 @@
-import PulsoPublicTimeline from "@/components/pulso-public-timeline";
+import PulsoFeedView from "@/app/solos/pulso/feed/feed-view";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -9,5 +9,5 @@ export const metadata = {
 
 export default async function TimelinePage({ searchParams }: { searchParams: Promise<{ before?: string }> }) {
   const { before } = await searchParams;
-  return <PulsoPublicTimeline before={before} />;
+  return <PulsoFeedView before={before} publicOnly />;
 }

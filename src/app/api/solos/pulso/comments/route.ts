@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "authentication_required" }, { status: 401 });
   const access = await getPulsoAlphaAccess(user.id);
   if (!access.canInteract) return NextResponse.json({ error: access.canReadFeed ? "social_consent_required" : access.reason }, { status: 403 });
-  const body = await request.json().catch(() => null) as { postId?: string; parentCommentId?: string | null; content?: string } | null;
+  const body = await request.json().catch(() => null) as { postId?: string; parentCommentId?: string | null; content?: string; publicContext?: boolean } | null;
   const postId = body?.postId?.trim() ?? "";
   const parentId = body?.parentCommentId?.trim() || null;
   const content = body?.content?.trim() ?? "";
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const moderation = await moderatePulsoText(content);
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc("pulso_alpha_submit_comment", {
+  const { data, error } = await admin.rpc("pulso_alpha_submit_comment_v2", {
     p_user_id: user.id,
     p_post_id: postId,
     p_parent_comment_id: parentId,
@@ -44,9 +44,10 @@ export async function POST(request: Request) {
     p_risk_score: moderation.riskScore,
     p_labels: moderation.labels,
     p_reasons: moderation.reasons,
+    p_public_context: body?.publicContext === true,
   });
   if (error) {
-    const known = ["post_unavailable", "parent_comment_unavailable", "thread_depth_limit", "hourly_comment_limit"].find((code) => error.message.includes(code));
+    const known = ["public_context_required", "post_unavailable", "parent_comment_unavailable", "thread_depth_limit", "hourly_comment_limit"].find((code) => error.message.includes(code));
     return NextResponse.json({ error: known ?? "comment_failed" }, { status: known === "hourly_comment_limit" ? 429 : known ? 400 : 500 });
   }
   const result = data as { status?: string } | null;

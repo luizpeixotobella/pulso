@@ -12,13 +12,14 @@ export type PulsoFeedComment = {
 
 export type PulsoFeedPost = {
   id: string; body: string | null; createdAt: string; own: boolean; authorName: string; handle: string | null;
+  conversationId?: string; visibility?: "public" | "limited"; agentDisclosure?: string | null;
   topicTitle: string | null; imageUrl: string | null; imageBytes: number | null; commentsEnabled: boolean;
   original: null | { id: string; authorName: string; handle: string | null; body: string | null; imageUrl: string | null; imageBytes: number | null; createdAt: string };
   reactions: Record<string, number>; ownReactions: string[]; comments: PulsoFeedComment[];
 };
 
 type Topic = { id: string; title: string; prompt: string; endsAt: string | null; suggestedByGhost: boolean };
-type Props = { posts: PulsoFeedPost[]; topics: Topic[]; canRead: boolean; canPublish: boolean; canInteract: boolean; valueLoopConsent: boolean; accessReason: string; nextHref: string | null };
+type Props = { showComposer?: boolean; posts: PulsoFeedPost[]; topics: Topic[]; canRead: boolean; canPublish: boolean; canInteract: boolean; valueLoopConsent: boolean; accessReason: string; nextHref: string | null };
 
 const reactionLabels: Record<string, string> = {
   like: "♥ Curti",
@@ -26,6 +27,12 @@ const reactionLabels: Record<string, string> = {
   curious: "◉ Quero entender",
   respectful_disagree: "↔ Discordo com respeito",
 };
+
+function PostText({ text }: { text: string }) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, index) => /^https?:\/\//.test(part)
+    ? <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
+    : part);
+}
 
 function formatBytes(bytes: number | null) {
   if (!bytes) return "";
@@ -41,7 +48,7 @@ function PulsoImage({ url, bytes }: { url: string; bytes: number | null }) {
   );
 }
 
-function CommentThread({ comments, parentId = null, onReply }: { comments: PulsoFeedComment[]; parentId?: string | null; onReply: (comment: PulsoFeedComment) => void }) {
+function CommentThread({ comments, parentId = null, onReply }: { comments: PulsoFeedComment[]; parentId?: string | null; onReply?: (comment: PulsoFeedComment) => void }) {
   return (
     <div style={{ display: "grid", gap: 8 }}>
       {comments.filter((comment) => comment.parentCommentId === parentId).map((comment) => (
@@ -49,11 +56,11 @@ function CommentThread({ comments, parentId = null, onReply }: { comments: Pulso
           <article className="comment-card">
             <div className="section-head">
               <strong>{comment.authorName}{comment.handle ? ` · @${comment.handle}` : ""}</strong>
-              <small>{new Date(comment.createdAt).toLocaleString("pt-BR")}</small>
+              <small>{new Date(comment.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</small>
             </div>
             {comment.agentDisclosure ? <p style={{ color: "var(--accent-2)", fontSize: 12, margin: "4px 0" }}>◇ {comment.agentDisclosure} · comentário patrocinado por adulto responsável</p> : null}
             <p style={{ whiteSpace: "pre-wrap" }}>{comment.content}</p>
-            {comment.depth < 3 ? <button className="btn" type="button" onClick={() => onReply(comment)}>Responder</button> : <small>Profundidade máxima da conversa.</small>}
+            {onReply && comment.depth < 3 ? <button className="btn" type="button" onClick={() => onReply(comment)}>Responder</button> : comment.depth >= 3 ? <small>Profundidade máxima da conversa.</small> : null}
           </article>
           <CommentThread comments={comments} parentId={comment.id} onReply={onReply} />
         </div>
@@ -62,23 +69,29 @@ function CommentThread({ comments, parentId = null, onReply }: { comments: Pulso
   );
 }
 
-function PostCard({ post, canInteract, onMessage }: { post: PulsoFeedPost; canInteract: boolean; onMessage: (message: string) => void }) {
+export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = false }: { post: PulsoFeedPost; canInteract: boolean; onMessage?: (message: string) => void; readOnly?: boolean }) {
   const router = useRouter();
   const [comment, setComment] = useState("");
   const [replyTo, setReplyTo] = useState<PulsoFeedComment | null>(null);
   const [busy, setBusy] = useState(false);
+  const conversationId = post.conversationId ?? post.id;
+  const isPublic = post.visibility === "public";
+  const conversationHref = `/solos/pulso/feed#post-${conversationId}`;
+  const loginHref = `/login?next=${encodeURIComponent(conversationHref)}`;
   async function react(reaction: string) {
     if (!canInteract) return onMessage("Aceite a atualização Alpha 0.1 para reagir.");
-    const response = await fetch("/api/solos/pulso/reactions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId: post.id, reaction }) });
+    const response = await fetch("/api/solos/pulso/reactions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId: conversationId, reaction }) });
     onMessage(response.ok ? "Sinal registrado — ele descreve o conteúdo, nunca o valor de uma pessoa." : "Não foi possível registrar o sinal.");
     if (response.ok) router.refresh();
   }
   async function sendComment(event: FormEvent) {
     event.preventDefault(); setBusy(true);
-    const response = await fetch("/api/solos/pulso/comments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId: post.id, parentCommentId: replyTo?.id ?? null, content: comment }) });
+    const response = await fetch("/api/solos/pulso/comments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ postId: conversationId, parentCommentId: replyTo?.id ?? null, content: comment, publicContext: isPublic }) });
     setBusy(false);
     if (response.status === 202) { setComment(""); setReplyTo(null); onMessage("Comentário recebido e oculto até a revisão humana."); return; }
     if (response.status === 422) { setComment(""); setReplyTo(null); onMessage("O comentário não entrou por segurança."); return; }
+    const result = await response.json().catch(() => ({}));
+    if (result.error === "public_context_required") return onMessage("Esta conversa é pública. Atualize a página e confira o aviso antes de responder.");
     onMessage("Não foi possível enviar o comentário agora.");
   }
   async function repost() {
@@ -100,10 +113,12 @@ function PostCard({ post, canInteract, onMessage }: { post: PulsoFeedPost; canIn
     <article className="panel" id={`post-${post.id}`}>
       <div className="section-head">
         <div><strong>{post.authorName}{post.handle ? ` · @${post.handle}` : ""}</strong>{post.original ? <small style={{ display: "block", color: "var(--accent-2)" }}>repassou no Pulso</small> : null}</div>
-        <span style={{ fontSize: 12, color: "var(--muted)" }}>{new Date(post.createdAt).toLocaleString("pt-BR")}</span>
+        <Link aria-label="Link desta publicação" href={`${isPublic ? "/timeline" : "/solos/pulso/feed"}#post-${conversationId}`} style={{ fontSize: 12, color: "var(--muted)" }}>{new Date(post.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</Link>
       </div>
+      <p className="section-kicker">{isPublic ? "Conversa pública · visível sem login" : "Piloto privado · acesso restrito"}</p>
+      {post.agentDisclosure ? <p className="section-kicker">◇ {post.agentDisclosure} · participação identificada de inteligência artificial</p> : null}
       {post.topicTitle ? <p className="section-kicker">Tema · {post.topicTitle}</p> : null}
-      {post.body ? <p style={{ whiteSpace: "pre-wrap" }}>{post.body}</p> : null}
+      {post.body ? <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><PostText text={post.body} /></p> : null}
       {post.imageUrl ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} /> : null}
       {post.original ? (
         <div className="comment-card" style={{ marginTop: 12 }}>
@@ -113,26 +128,28 @@ function PostCard({ post, canInteract, onMessage }: { post: PulsoFeedPost; canIn
         </div>
       ) : null}
       <div className="action-row" style={{ marginTop: 14 }}>
-        {Object.entries(reactionLabels).map(([type, label]) => <button key={type} className="btn" type="button" aria-pressed={post.ownReactions.includes(type)} onClick={() => react(type)} style={post.ownReactions.includes(type) ? { borderColor: "var(--accent-2)" } : undefined}>{label} · {post.reactions[type] ?? 0}</button>)}
-        {!post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
+        {Object.entries(reactionLabels).map(([type, label]) => <button key={type} className="btn" type="button" aria-pressed={post.ownReactions.includes(type)} disabled={!canInteract} onClick={() => react(type)} style={post.ownReactions.includes(type) ? { borderColor: "var(--accent-2)" } : undefined}>{label} · {post.reactions[type] ?? 0}</button>)}
+        {canInteract && !post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
       </div>
       <section style={{ marginTop: 16 }}>
         <h3>{post.comments.length} {post.comments.length === 1 ? "comentário" : "comentários"}</h3>
-        <CommentThread comments={post.comments} onReply={(item) => { setReplyTo(item); setComment(""); }} />
+        <CommentThread comments={post.comments} onReply={canInteract && post.commentsEnabled ? (item) => { setReplyTo(item); setComment(""); } : undefined} />
         {canInteract && post.commentsEnabled ? (
           <form className="comment-form" onSubmit={sendComment} style={{ marginTop: 12 }}>
             {replyTo ? <p className="section-kicker">Respondendo a {replyTo.authorName} · nível {replyTo.depth + 1}/3 <button type="button" className="btn" onClick={() => setReplyTo(null)}>Cancelar</button></p> : null}
+            {isPublic ? <p role="note">Sua resposta será pública, inclusive para quem não tem conta, após a revisão. Seu email e os dados privados do perfil não serão exibidos.</p> : null}
             <label>{replyTo ? "Sua resposta" : "Entre na conversa"}<textarea rows={3} maxLength={500} value={comment} onChange={(event) => setComment(event.target.value)} required /></label>
             <button className="btn primary" type="submit" disabled={busy}>{busy ? "Protegendo…" : "Enviar para revisão"}</button>
           </form>
         ) : canInteract ? <p style={{ color: "var(--muted)", fontSize: 13 }}>Comentários fechados neste post. O autor ainda não ativou a conversa Alpha 0.1.</p> : null}
       </section>
-      {!post.own ? <div className="action-row" style={{ marginTop: 14 }}><button className="btn" type="button" onClick={() => report("harassment")}>Denunciar</button><button className="btn" type="button" onClick={() => report("child_safety")}>Risco infantil</button><button className="btn" type="button" onClick={block}>Bloquear conta</button></div> : null}
+      {!canInteract && isPublic ? <Link className="btn" href={readOnly ? loginHref : "/solos/pulso/entrar"}>Entrar para participar desta conversa</Link> : null}
+      {canInteract && !post.own ? <div className="action-row" style={{ marginTop: 14 }}><button className="btn" type="button" onClick={() => report("harassment")}>Denunciar</button><button className="btn" type="button" onClick={() => report("child_safety")}>Risco infantil</button><button className="btn" type="button" onClick={block}>Bloquear conta</button></div> : null}
     </article>
   );
 }
 
-export default function PulsoFeedClient({ posts, topics, canRead, canPublish, canInteract, valueLoopConsent, accessReason, nextHref }: Props) {
+export default function PulsoFeedClient({ showComposer = true, posts, topics, canRead, canPublish, canInteract, valueLoopConsent, accessReason, nextHref }: Props) {
   const router = useRouter();
   const composerRef = useRef<HTMLFormElement>(null);
   const [text, setText] = useState("");
@@ -210,12 +227,12 @@ export default function PulsoFeedClient({ posts, topics, canRead, canPublish, ca
       ) : null}
       {canRead && topics.length ? topics.map((topic) => (
         <section className="panel" key={topic.id}>
-          <div className="section-head"><div><p className="section-kicker">Tema ativo {topic.suggestedByGhost ? "· Ghost shadow" : ""}</p><h2>{topic.title}</h2></div>{topic.endsAt ? <small>até {new Date(topic.endsAt).toLocaleString("pt-BR")}</small> : null}</div>
+          <div className="section-head"><div><p className="section-kicker">Tema ativo {topic.suggestedByGhost ? "· Ghost shadow" : ""}</p><h2>{topic.title}</h2></div>{topic.endsAt ? <small>até {new Date(topic.endsAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</small> : null}</div>
           <p>{topic.prompt}</p>
           <button className="btn primary" type="button" disabled={!canInteract} onClick={() => chooseTopic(topic)}>Responder a este tema</button>
         </section>
       )) : null}
-      {canRead && canPublish && canInteract ? (
+      {showComposer && canRead && canPublish && canInteract ? (
         <form ref={composerRef} className="panel comment-form" onSubmit={publish}>
           <p className="section-kicker">Compartilhar no piloto</p>
           {topics.length ? <label>Tema opcional<select value={topicId} onChange={(event) => setTopicId(event.target.value)}><option value="">Sem tema</option>{topics.map((topic) => <option key={topic.id} value={topic.id}>{topic.title}</option>)}</select></label> : null}
@@ -224,7 +241,7 @@ export default function PulsoFeedClient({ posts, topics, canRead, canPublish, ca
           <p style={{ fontSize: 13 }}>Original até 3 MB. O servidor remove metadados, converte para WebP privado e busca ficar abaixo de 1 MB. Texto e imagem só aparecem após decisão humana.</p>
           <button className="btn primary" type="submit" disabled={busy}>{busy ? "Protegendo…" : "Enviar para revisão"}</button>
         </form>
-      ) : canRead && !canPublish ? (
+      ) : showComposer && canRead && !canPublish ? (
         <section className="panel"><h2>Envio pausado</h2><p>Você continua no feed, mas novos conteúdos não entram na fila enquanto a porta de publicação estiver fechada.</p></section>
       ) : !canRead ? (
         <section className="panel"><h2>{accessReason === "authentication_required" ? "Entre para continuar no Pulso" : accessReason === "verified_invite_required" ? "Vamos concluir sua entrada" : "O feed está pausado"}</h2><p>{accessReason === "authentication_required" || accessReason === "verified_invite_required" ? "Veja suas etapas: conta, email confirmado e convite pessoal com verificação adulta. Criar conta não libera o feed automaticamente." : "Não é necessário criar outra conta. Você pode consultar as etapas de participação enquanto aguarda a reabertura."}</p><div className="action-row"><Link className="btn primary" href="/solos/pulso/entrar">Ver minha entrada no Pulso</Link><Link className="btn" href="/solos/pulso/seguranca">Entender as regras</Link></div></section>
