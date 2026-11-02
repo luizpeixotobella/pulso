@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { PulsoHeader, PulsoCredits } from "@/components/pulso-brand";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pulso.rocks"),
@@ -57,7 +58,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
-        {children}
+        <a className="skip-link" href="#pulso-content">Pular para o conteúdo</a>
+        <PulsoHeader />
+        <div id="pulso-content">{children}</div>
+        <div className="container"><PulsoCredits /></div>
       </body>
     </html>
   );

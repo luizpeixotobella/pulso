@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { PulsoBrand } from "@/components/pulso-brand";
 import { safeAuthNext } from "@/lib/auth-next";
 import LoginForm from "./login-form";
 
@@ -15,7 +14,6 @@ export default async function LoginPage({ searchParams }: Props) {
   const nextPath = safeAuthNext(next);
   return (
     <main className="container auth-page">
-      <header className="landing-header"><PulsoBrand /></header>
       <section className="panel auth-panel">
         <p className="section-kicker">Pulso · acesso seguro</p>
         <h1>Entrar no Pulso</h1>

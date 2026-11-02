@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { PulsoBrand, PulsoCredits } from "@/components/pulso-brand";
+import { LBArtesDiscovery } from "@/components/pulso-brand";
 import SoftwareStructuredData from "@/components/software-structured-data";
 
 export default function Home() {
   return (
     <main className="container landing-page">
       <SoftwareStructuredData />
-      <header className="landing-header"><PulsoBrand /></header>
       <section className="panel landing-hero">
         <p className="section-kicker">Sinal humano · retorno real</p>
         <h1>Uma rede social humana, segura e conectada ao SolOS.</h1>
@@ -26,11 +25,7 @@ export default function Home() {
           de um arco de proteção atravessado por um pulso: presença, ritmo e retorno.
         </p>
       </section>
-      <p>
-        O Pulso está em extração progressiva do CMS da LBArtes, com operação independente
-        em preparação e rollback preservado.
-      </p>
-      <PulsoCredits />
+      <LBArtesDiscovery />
     </main>
   );
 }

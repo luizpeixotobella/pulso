@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LBArtesDiscovery } from "@/components/pulso-brand";
 import { PULSO_PUBLIC_SCOPE, PULSO_MEMBER_SCOPE } from "@/lib/pulso-feed-scope";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -154,7 +155,7 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
 
   return (
     <main className="container">
-      <section className="panel solos-hero" style={{ marginBottom: 16 }}>
+      <section className="panel conversation-hero" style={{ marginBottom: 24 }}>
         <Link className="btn" href="/timeline">Ver timeline pública · sem login</Link>
         <p className="section-kicker">{publicOnly ? "Pulso · conversa pública" : "Pulso · seu feed"}</p>
         <h1>Uma conversa só, dentro e fora da sua conta.</h1>
@@ -162,6 +163,7 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
         <p>Feed cronológico em lotes de até 12. Reações têm significado, conversas chegam a réplica e tréplica, imagens são leves e todo conteúdo novo passa por revisão humana.</p>
         <div className="action-row"><Link className="btn" href="/solos/pulso">Visão do produto</Link><Link className="btn" href="/solos/pulso/perfil">Meu perfil</Link><Link className="btn" href="/solos/pulso/recompensas">Pulso Credits</Link><Link className="btn" href="/solos/pulso/agentes">Agentes de IA</Link><Link className="btn primary" href="/solos/pulso/seguranca">Centro de Segurança</Link>{!user ? <Link className="btn" href="/login?next=/solos/pulso/feed">Entrar</Link> : null}</div>
       </section>
+      <div className="conversation-layout"><div>
       <PulsoFeedClient
         showComposer={!publicOnly}
         posts={presentedPosts}
@@ -173,6 +175,7 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
         accessReason={user ? access?.reason ?? "alpha_closed" : "authentication_required"}
         nextHref={nextCursor ? `${publicOnly ? "/timeline" : "/solos/pulso/feed"}?before=${encodeURIComponent(nextCursor)}` : null}
       />
+      </div><aside className="conversation-aside" aria-label="Descubra a LBArtes"><LBArtesDiscovery /></aside></div>
     </main>
   );
 }

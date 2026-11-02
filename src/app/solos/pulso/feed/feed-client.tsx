@@ -110,7 +110,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
     onMessage(response.ok ? "Conta bloqueada para você." : "Não foi possível bloquear agora."); if (response.ok) router.refresh();
   }
   return (
-    <article className="panel" id={`post-${post.id}`}>
+    <article className="panel conversation-card" id={`post-${post.id}`}>
       <div className="section-head">
         <div><strong>{post.authorName}{post.handle ? ` · @${post.handle}` : ""}</strong>{post.original ? <small style={{ display: "block", color: "var(--accent-2)" }}>repassou no Pulso</small> : null}</div>
         <Link aria-label="Link desta publicação" href={`${isPublic ? "/timeline" : "/solos/pulso/feed"}#post-${conversationId}`} style={{ fontSize: 12, color: "var(--muted)" }}>{new Date(post.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</Link>
@@ -127,7 +127,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
           {post.original.imageUrl ? <PulsoImage url={post.original.imageUrl} bytes={post.original.imageBytes} /> : null}
         </div>
       ) : null}
-      <div className="action-row" style={{ marginTop: 14 }}>
+      <div className="action-row reaction-row" style={{ marginTop: 14 }}>
         {Object.entries(reactionLabels).map(([type, label]) => <button key={type} className="btn" type="button" aria-pressed={post.ownReactions.includes(type)} disabled={!canInteract} onClick={() => react(type)} style={post.ownReactions.includes(type) ? { borderColor: "var(--accent-2)" } : undefined}>{label} · {post.reactions[type] ?? 0}</button>)}
         {canInteract && !post.own && !post.original ? <button className="btn" type="button" onClick={repost}>⟳ Repassar</button> : null}
       </div>

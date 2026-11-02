@@ -1,4 +1,3 @@
-import { PulsoBrand } from "@/components/pulso-brand";
 import { safeAuthNext } from "@/lib/auth-next";
 import SignupForm from "./signup-form";
 
@@ -14,7 +13,6 @@ export default async function CadastroPage({ searchParams }: Props) {
   const nextPath = safeAuthNext(next);
   return (
     <main className="container auth-page">
-      <header className="landing-header"><PulsoBrand /></header>
       <section className="panel auth-panel">
         <p className="section-kicker">Pulso · primeiro passo</p>
         <h1>Crie sua conta para continuar</h1>
