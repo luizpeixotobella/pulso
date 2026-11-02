@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPulsoAlphaAccess, PULSO_ALPHA_FEED_BATCH } from "@/lib/pulso-alpha";
 import PulsoFeedClient, { type PulsoFeedPost } from "./feed-client";
+import PulsoPublicTimeline from "@/components/pulso-public-timeline";
 
 export const metadata = {
   title: "Feed seguro",
@@ -26,6 +27,7 @@ export default async function PulsoFeedPage({ searchParams }: Props) {
   const supabase = await createClient();
   const admin = createAdminClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return <PulsoPublicTimeline before={before} />;
   const access = user ? await getPulsoAlphaAccess(user.id) : null;
   const batchSize = Math.min(PULSO_ALPHA_FEED_BATCH, access?.settings?.feed_batch_size ?? PULSO_ALPHA_FEED_BATCH);
   const cursor = before && Number.isFinite(Date.parse(before)) ? before : null;
@@ -157,6 +159,7 @@ export default async function PulsoFeedPage({ searchParams }: Props) {
   return (
     <main className="container">
       <section className="panel solos-hero" style={{ marginBottom: 16 }}>
+        <Link className="btn" href="/timeline">Ver timeline pública · sem login</Link>
         <p className="section-kicker">Pulso Alpha 0.2 · até 10 adultos</p>
         <h1>Conversa com sinais úteis, não caça-níquel de atenção.</h1>
         <p>Feed cronológico em lotes de até 12. Reações têm significado, conversas chegam a réplica e tréplica, imagens são leves e todo conteúdo novo passa por revisão humana.</p>

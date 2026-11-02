@@ -15,6 +15,7 @@ export default function Home() {
           com regras claras, segurança por padrão e valor que volta para as pessoas.
         </p>
         <div className="action-row">
+          <Link className="btn primary" href="/timeline">Ver timeline · sem login</Link>
           <Link className="btn primary" href="/solos/pulso">Conhecer o Pulso</Link>
           <Link className="btn" href="/solos/pulso/regras">Ler as regras</Link>
         </div>

@@ -4,6 +4,7 @@ const siteUrl = "https://pulso.rocks";
 
 const publicRoutes = [
   { path: "/", priority: 1 },
+  { path: "/timeline", priority: 0.9 },
   { path: "/solos", priority: 0.8 },
   { path: "/solos/pulso", priority: 0.9 },
   { path: "/solos/pulso/entrar", priority: 0.6 },
