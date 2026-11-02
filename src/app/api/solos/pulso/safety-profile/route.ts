@@ -23,7 +23,10 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
-  const { data: current } = await admin.from("pulso_safety_profiles").select("age_assurance,status").eq("user_id", user.id).maybeSingle();
+  const { data: current } = await admin.from("pulso_safety_profiles").select("age_assurance,status,age_band").eq("user_id", user.id).maybeSingle();
+  if (current && (["locked", "deleted"].includes(current.status) || ["child", "young_teen"].includes(current.age_band))) {
+    return NextResponse.json({ error: "account_restricted" }, { status: 403 });
+  }
   if (current?.age_assurance === "verified_adult" && current.status === "active") {
     return NextResponse.json({ status: "verified_adult", canPublish: true, inviteRequired: false });
   }
