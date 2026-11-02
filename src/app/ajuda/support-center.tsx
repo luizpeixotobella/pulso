@@ -1,8 +1,9 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP, SUPPORT_TOPICS, SUPPORT_STATUSES, type SupportView } from "@/lib/support";
 
 export default function SupportCenter() {
+  const receiptRef = useRef<HTMLElement>(null);
   const [contacts, setContacts] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -10,6 +11,7 @@ export default function SupportCenter() {
   const [id, setId] = useState("");
   const [key, setKey] = useState("");
   const [ticket, setTicket] = useState<SupportView | null>(null);
+  useEffect(() => { if (receipt) receiptRef.current?.focus(); }, [receipt]);
   async function send(data: object) {
     const response = await fetch("/api/atendimento", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), cache: "no-store" });
     const value = await response.json();
@@ -58,7 +60,7 @@ export default function SupportCenter() {
       <noscript><p>Sem JavaScript? Escreva para <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> ou <a href={`https://wa.me/${SUPPORT_WHATSAPP}`}>abra o WhatsApp</a>.</p></noscript>
     </section>
     <p className="support-feedback" role="status" aria-live="polite">{notice}</p>
-    {receipt ? <section className="panel support-receipt" aria-labelledby="receipt-title">
+    {receipt ? <section className="panel support-receipt" aria-labelledby="receipt-title" ref={receiptRef} tabIndex={-1}>
       <h2 id="receipt-title">Seu comprovante de atendimento</h2>
       <p>Guarde os dois campos. A chave é privada: quem tiver acesso a ela e ao protocolo poderá ler e continuar esta conversa.</p>
       <label>Protocolo<input readOnly value={receipt.id} onFocus={event => event.currentTarget.select()} /></label>
