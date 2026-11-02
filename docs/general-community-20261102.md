@@ -24,6 +24,7 @@ Pedido de Luiz: Pulso não é exclusivamente adulto nem hospeda conteúdo adulto
 ## Evidências
 
 - `tests/community-ui.mjs`: hash do aviso, caixa obrigatória 17+, composer público com reconhecimento, sem imagem/créditos/aceite legado.
+- `tests/community-route-guards.mjs`: perfil bloqueado/excluído ou conhecido como jovem não pode ser sobrescrito por autodeclaração; adesão exige aceite e usa usuário da sessão, não um ID enviado pelo cliente.
 - `tests/shared-conversation-card.mjs`: mesmos posts, threading, visitante sem mutação, aviso público e isolamento privado.
 - `supabase/tests/general_community.sql`: fixtures de auth sem email externo; confirmação ativa automaticamente, aceite/email ausente não ativa; idempotência, sem verificação falsa/convite; posts/comentários ocultos até aprovação; threading, reação/desfazer, bloqueio, suspensão, kill switch, RLS privado, grants e exclusão. Tudo com rollback, inclusive notificações e perfis de QA.
 - Regressão SQL do piloto antigo passou com a nova migração dentro de transação revertida.
