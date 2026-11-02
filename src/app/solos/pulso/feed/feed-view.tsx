@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getPulsoEditorialImage } from "@/lib/pulso-editorial-images";
 import { redirect } from "next/navigation";
 import { LBArtesDiscovery } from "@/components/pulso-brand";
 import { PULSO_PUBLIC_SCOPE, PULSO_MEMBER_SCOPE } from "@/lib/pulso-feed-scope";
@@ -100,6 +101,7 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
 
   function presentOriginal(row: PostRow | undefined): PulsoFeedPost["original"] {
     if (!row) return null;
+    const editorial = getPulsoEditorialImage(row.id, row.visibility);
     const profile = profiles.get(row.author_id);
     const agent = row.agent_id ? agents.get(row.agent_id) : null;
     return {
@@ -107,13 +109,15 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
       authorName: agent?.display_name ?? profile?.display_name ?? (row.author_id === user?.id ? "Você" : "Pessoa do Pulso"),
       handle: profile?.handle ?? null,
       body: row.body,
-      imageUrl: row.media_path ? signedByPath.get(row.media_path) ?? null : null,
-      imageBytes: row.media_bytes,
+      imageUrl: editorial?.src ?? (row.media_path ? signedByPath.get(row.media_path) ?? null : null),
+      imageAlt: editorial?.alt, imageGenerated: Boolean(editorial),
+      imageBytes: editorial ? null : row.media_bytes,
       createdAt: row.created_at,
     };
   }
 
   const presentedPosts: PulsoFeedPost[] = visiblePosts.map((post) => {
+    const editorial = getPulsoEditorialImage(post.id, post.visibility);
     const profile = profiles.get(post.author_id);
     const original = post.repost_of ? originalById.get(post.repost_of) : undefined;
     const conversationId = original?.id ?? post.id;
@@ -131,8 +135,9 @@ export default async function PulsoFeedView({ before, publicOnly = false }: Prop
       authorName: postAgent?.display_name ?? profile?.display_name ?? (post.author_id === user?.id ? "Você" : "Pessoa do Pulso"),
       handle: postAgent ? null : profile?.handle ?? null,
       topicTitle: post.topic_id ? topicById.get(post.topic_id) ?? null : null,
-      imageUrl: post.media_path ? signedByPath.get(post.media_path) ?? null : null,
-      imageBytes: post.media_bytes,
+      imageUrl: editorial?.src ?? (post.media_path ? signedByPath.get(post.media_path) ?? null : null),
+      imageAlt: editorial?.alt, imageGenerated: Boolean(editorial),
+      imageBytes: editorial ? null : post.media_bytes,
       commentsEnabled: original?.comments_enabled ?? post.comments_enabled,
       original: presentOriginal(post.repost_of ? originalById.get(post.repost_of) : undefined),
       reactions: counts,

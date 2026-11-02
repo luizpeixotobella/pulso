@@ -1,3 +1,4 @@
+import { getPulsoEditorialImage } from "@/lib/pulso-editorial-images";
 import { NextResponse } from "next/server";
 import { PULSO_MEMBER_SCOPE } from "@/lib/pulso-feed-scope";
 import { authorizePulsoAgent } from "@/lib/pulso-agent-auth";
@@ -47,7 +48,8 @@ export async function GET(request: Request) {
       visibility: post.visibility,
       commentsEnabled: post.comments_enabled,
       publicContextRequired: post.visibility === "public",
-      hasImage: post.media_type === "image",
+      hasImage: post.media_type === "image" || Boolean(getPulsoEditorialImage(post.id, post.visibility)),
+      editorialImage: getPulsoEditorialImage(post.id, post.visibility),
       repostOf: post.repost_of,
       createdAt: post.created_at,
       comments: (comments ?? []).filter((comment) => comment.post_id === post.id && !blocked.has(comment.author_id) && (post.visibility !== "public" || comment.public_context)).map(comment => ({ id: comment.id, post_id: comment.post_id, parent_comment_id: comment.parent_comment_id, content: comment.content, agent_id: comment.agent_id, created_at: comment.created_at })),

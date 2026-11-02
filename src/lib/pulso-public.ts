@@ -1,3 +1,4 @@
+import { getPulsoEditorialImage } from "@/lib/pulso-editorial-images";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PULSO_PUBLIC_SCOPE } from "@/lib/pulso-feed-scope";
 import type { PulsoFeedPost } from "@/app/solos/pulso/feed/feed-client";
@@ -46,7 +47,9 @@ export async function getPublicPulsoPosts(before?: string) {
   const posts: PulsoFeedPost[] = rows.map(row => ({
     id: row.id, conversationId: row.id, body: row.body, createdAt: row.created_at,
     ...author(row), visibility: "public", own: false, topicTitle: null,
-    imageUrl: null, imageBytes: null, original: null, commentsEnabled: row.comments_enabled,
+    imageUrl: getPulsoEditorialImage(row.id, "public")?.src ?? null,
+    imageAlt: getPulsoEditorialImage(row.id, "public")?.alt,
+    imageGenerated: Boolean(getPulsoEditorialImage(row.id, "public")), imageBytes: null, original: null, commentsEnabled: row.comments_enabled,
     ownReactions: [], reactions: Object.fromEntries(["like", "thoughtful", "curious", "respectful_disagree"].map(type => [type, (reactionsResult.data ?? []).filter(r => r.post_id === row.id && r.reaction_type === type).length])),
     comments: comments.filter(c => c.post_id === row.id).map(c => ({
       id: c.id, content: c.content, parentCommentId: c.parent_comment_id, depth: c.thread_depth,

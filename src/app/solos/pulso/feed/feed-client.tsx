@@ -13,8 +13,9 @@ export type PulsoFeedComment = {
 export type PulsoFeedPost = {
   id: string; body: string | null; createdAt: string; own: boolean; authorName: string; handle: string | null;
   conversationId?: string; visibility?: "public" | "limited"; agentDisclosure?: string | null;
+  imageAlt?: string; imageGenerated?: boolean;
   topicTitle: string | null; imageUrl: string | null; imageBytes: number | null; commentsEnabled: boolean;
-  original: null | { id: string; authorName: string; handle: string | null; body: string | null; imageUrl: string | null; imageBytes: number | null; createdAt: string };
+  original: null | { id: string; authorName: string; handle: string | null; body: string | null; imageUrl: string | null; imageBytes: number | null; imageAlt?: string; imageGenerated?: boolean; createdAt: string };
   reactions: Record<string, number>; ownReactions: string[]; comments: PulsoFeedComment[];
 };
 
@@ -39,11 +40,11 @@ function formatBytes(bytes: number | null) {
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
 }
 
-function PulsoImage({ url, bytes }: { url: string; bytes: number | null }) {
+function PulsoImage({ url, bytes, alt, generated = false }: { url: string; bytes: number | null; alt?: string; generated?: boolean }) {
   return (
     <figure style={{ margin: "14px 0 0" }}>
-      <Image src={url} alt="Imagem compartilhada no Pulso" width={1200} height={1200} unoptimized style={{ width: "100%", height: "auto", maxHeight: 720, objectFit: "contain", borderRadius: 16, background: "rgba(0,0,0,.18)" }} />
-      <figcaption style={{ color: "var(--muted)", fontSize: 12, marginTop: 6 }}>WebP privado · {formatBytes(bytes)} · metadados removidos</figcaption>
+      <Image src={url} alt={alt ?? "Imagem compartilhada no Pulso"} width={generated ? 1536 : 1200} height={generated ? 1024 : 1200} unoptimized style={{ width: "100%", height: "auto", maxHeight: 720, objectFit: "contain", borderRadius: 16, background: "rgba(0,0,0,.18)" }} />
+      <figcaption style={{ color: "var(--muted)", fontSize: 12, marginTop: 6 }}>{generated ? "Ilustração gerada por IA · imagem simbólica, não registro documental" : `WebP privado · ${formatBytes(bytes)} · metadados removidos`}</figcaption>
     </figure>
   );
 }
@@ -118,13 +119,14 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
       <p className="section-kicker">{isPublic ? "Conversa pública · visível sem login" : "Piloto privado · acesso restrito"}</p>
       {post.agentDisclosure ? <p className="section-kicker">◇ {post.agentDisclosure} · participação identificada de inteligência artificial</p> : null}
       {post.topicTitle ? <p className="section-kicker">Tema · {post.topicTitle}</p> : null}
+      {post.imageGenerated && post.imageUrl ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} alt={post.imageAlt} generated /> : null}
       {post.body ? <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><PostText text={post.body} /></p> : null}
-      {post.imageUrl ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} /> : null}
+      {post.imageUrl && !post.imageGenerated ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} alt={post.imageAlt} generated={post.imageGenerated} /> : null}
       {post.original ? (
         <div className="comment-card" style={{ marginTop: 12 }}>
           <strong>{post.original.authorName}{post.original.handle ? ` · @${post.original.handle}` : ""}</strong>
           {post.original.body ? <p style={{ whiteSpace: "pre-wrap" }}>{post.original.body}</p> : null}
-          {post.original.imageUrl ? <PulsoImage url={post.original.imageUrl} bytes={post.original.imageBytes} /> : null}
+          {post.original.imageUrl ? <PulsoImage url={post.original.imageUrl} bytes={post.original.imageBytes} alt={post.original.imageAlt} generated={post.original.imageGenerated} /> : null}
         </div>
       ) : null}
       <div className="action-row reaction-row" style={{ marginTop: 14 }}>
