@@ -20,6 +20,13 @@ Na UI, a ilustração editorial aparece antes do texto e recebe alt descritivo e
 
 ## Entrega 2026-11-02
 
+### Campanha aprovada em 2026-11-03
+
+- Post público explícito `7834d67f-eab7-4b41-9e98-c56c598c03a1`: demonstração “O neném acordou”, com vídeo e detalhes no blog LBArtes e chamada a Fundadores.
+- `ghost-demo-20261103.webp` reutiliza a ilustração Ghost já gerada e aprovada em 02/11, sem alteração semântica; original e prompts preservados em `output/pulso-images-20261102/` no workspace coordenador.
+- Luiz revisou o pacote de vídeo/textos e autorizou seguir. A associação continua exclusiva a esse ID público; nenhum conteúdo privado é promovido e nenhuma permissão de mídia é ampliada.
+- Reverter somente a nova entrada e o novo arquivo para retirar a imagem; não duplicar/apagar o post para corrigir apresentação.
+
 - `5b90beea-70e9-4f10-89e7-a2e04a0fb602`: democracia/diálogo; `democracia-dialogo-20261102.webp`,1536×1024,399664bytes.
 - `5b90beea-70e9-4f10-89e7-a2e04a0fb601`: Ghost/construção colaborativa/fundadores; `ghost-fundadores-20261102.webp`,1536×1024,386746bytes.
 - Modo: imagegen integrado, uma geração por ilustração. Prompts e originais no workspace coordenador em `output/pulso-images-20261102/`; nenhum segredo nos arquivos.

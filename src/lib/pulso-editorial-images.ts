@@ -1,6 +1,10 @@
 // Explicit, reviewed public illustrations. This is NOT a projection of private
 // media_path: private pilot/storage objects must never be exposed by this map.
 const illustrations: Record<string, { src: string; alt: string }> = {
+  "7834d67f-eab7-4b41-9e98-c56c598c03a1": {
+    src: "/pulso/editorial/ghost-demo-20261103.webp",
+    alt: "Ilustração simbólica de IA: o mascote Ghost em uma bancada de criação, com mãos colaborando; não é uma captura do sistema.",
+  },
   "5b90beea-70e9-4f10-89e7-a2e04a0fb602": {
     src: "/pulso/editorial/democracia-dialogo-20261102.webp",
     alt: "Ilustração de pessoas em igualdade ao redor de uma mesa, dialogando diante de uma urna sem símbolos partidários.",
