@@ -1,6 +1,10 @@
 // Explicit, reviewed public illustrations. This is NOT a projection of private
 // media_path: private pilot/storage objects must never be exposed by this map.
 const illustrations: Record<string, { src: string; alt: string }> = {
+  "a65cdefc-8873-43a2-b461-6a9fa94398ad": {
+    src: "/pulso/editorial/apoio-inutil-satira-20261105.webp",
+    alt: "Sátira em ilustração de IA: patinho de borracha discursa em um palanque de papel higiênico no banheiro. Cartazes: Apoio absolutamente inútil; Sátira, evento fictício. Sem símbolos partidários.",
+  },
   "d8d5c148-70b1-4be8-95cd-0587c6b3f205": {
     src: "/pulso/editorial/ghost-evolucao-20261105.webp",
     alt: "Ilustração de IA do mascote Ghost em uma bancada criativa. Mascote simbólico, não fotografia ou captura do sistema.",
