@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getPulsoEditorialVideo } from "@/lib/pulso-editorial-images";
 
 export type PulsoFeedComment = {
   id: string; content: string; parentCommentId: string | null; depth: number;
@@ -117,6 +118,7 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
   const [busy, setBusy] = useState(false);
   const conversationId = post.conversationId ?? post.id;
   const isPublic = post.visibility === "public";
+  const editorialVideo = getPulsoEditorialVideo(post.id, post.visibility);
   const conversationHref = postPermalink(conversationId, isPublic);
   const loginHref = `/login?next=${encodeURIComponent(conversationHref)}`;
   async function react(reaction: string) {
@@ -159,7 +161,16 @@ export function PostCard({ post, canInteract, onMessage = () => {}, readOnly = f
       <p className="section-kicker">{isPublic ? "Conversa pública · visível sem login" : "Piloto privado · acesso restrito"}</p>
       {post.agentDisclosure ? <p className="section-kicker">◇ {post.agentDisclosure} · participação identificada de inteligência artificial</p> : null}
       {post.topicTitle ? <p className="section-kicker">Tema · {post.topicTitle}</p> : null}
-      {post.imageGenerated && post.imageUrl ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} alt={post.imageAlt} generated /> : null}
+      {editorialVideo ? (
+        <figure style={{ margin: "16px 0" }}>
+          <video controls playsInline preload="none" poster={post.imageUrl ?? undefined} style={{ display: "block", width: "100%", maxHeight: 720, borderRadius: 14, background: "#09131c" }}>
+            <source src={editorialVideo.src} type="video/mp4" />
+            Seu navegador não reproduz o vídeo. <a href={editorialVideo.src}>Abrir o filme</a>.
+          </video>
+          <figcaption style={{ color: "var(--muted)", fontSize: 12, lineHeight: 1.6, marginTop: 8 }}>{editorialVideo.caption}</figcaption>
+        </figure>
+      ) : null}
+      {post.imageGenerated && post.imageUrl && !editorialVideo ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} alt={post.imageAlt} generated /> : null}
       {post.body ? <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><PostText text={post.body} /></p> : null}
       {post.imageUrl && !post.imageGenerated ? <PulsoImage url={post.imageUrl} bytes={post.imageBytes} alt={post.imageAlt} generated={post.imageGenerated} /> : null}
       {post.original ? (
